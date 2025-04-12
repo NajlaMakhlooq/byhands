@@ -1,5 +1,5 @@
-import 'package:byhands_application/pages/userInfo_pages/other_user_profilepages/UsersProfile.dart';
-import 'package:byhands_application/theme.dart';
+import 'package:byhands/pages/userInfo_pages/other_user_profilepages/UsersProfile.dart';
+import 'package:byhands/theme.dart';
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -32,12 +32,14 @@ class _FollowerlistDisplayState extends State<FollowerlistDisplay> {
   void updateSearchQuery(String query) {
     setState(() {
       searchQuery = query;
-      displayedFollower = widget.followerList
-          .where((user) => user['followed_by']
-              .toString()
-              .toLowerCase()
-              .contains(searchQuery.toLowerCase()))
-          .toList();
+      displayedFollower =
+          widget.followerList
+              .where(
+                (user) => user['followed_by'].toString().toLowerCase().contains(
+                  searchQuery.toLowerCase(),
+                ),
+              )
+              .toList();
     });
   }
 
@@ -65,69 +67,80 @@ class _FollowerlistDisplayState extends State<FollowerlistDisplay> {
             ),
           ),
           Expanded(
-            child: displayedFollower.isEmpty
-                ? Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(
-                          'No User found',
-                          style: Theme.of(context).textTheme.titleMedium,
-                        ),
-                      ],
-                    ),
-                  )
-                : ListView.builder(
-                    itemCount: displayedFollower.length,
-                    itemBuilder: (context, index) {
-                      final UserInfo = displayedFollower[index];
-                      return Padding(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 10, vertical: 5),
-                        child: Container(
-                          decoration: customContainerDecoration(context),
-                          child: ListTile(
-                            onTap: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => UsersProfile(
-                                    username: UserInfo['followed_by'],
+            child:
+                displayedFollower.isEmpty
+                    ? Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            'No User found',
+                            style: Theme.of(context).textTheme.titleMedium,
+                          ),
+                        ],
+                      ),
+                    )
+                    : ListView.builder(
+                      itemCount: displayedFollower.length,
+                      itemBuilder: (context, index) {
+                        final UserInfo = displayedFollower[index];
+                        return Padding(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 10,
+                            vertical: 5,
+                          ),
+                          child: Container(
+                            decoration: customContainerDecoration(context),
+                            child: ListTile(
+                              onTap: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder:
+                                        (context) => UsersProfile(
+                                          username: UserInfo['followed_by'],
+                                        ),
                                   ),
-                                ),
-                              );
-                            },
-                            contentPadding: EdgeInsets.symmetric(
-                                horizontal: 20, vertical: 5),
-                            title: Row(
-                              children: [
-                                CircleAvatar(
-                                  radius: 25,
-                                  backgroundImage: NetworkImage(
-                                    supabase.storage.from('images').getPublicUrl(
-                                        'images/profiles/${UserInfo['followed_by']}/${UserInfo['followed_by']}profile'),
+                                );
+                              },
+                              contentPadding: EdgeInsets.symmetric(
+                                horizontal: 20,
+                                vertical: 5,
+                              ),
+                              title: Row(
+                                children: [
+                                  CircleAvatar(
+                                    radius: 25,
+                                    backgroundImage: NetworkImage(
+                                      supabase.storage
+                                          .from('images')
+                                          .getPublicUrl(
+                                            'images/profiles/${UserInfo['followed_by']}/${UserInfo['followed_by']}profile',
+                                          ),
+                                    ),
+                                    onBackgroundImageError: (
+                                      error,
+                                      stackTrace,
+                                    ) {
+                                      // Handle errors gracefully
+                                      print('loading image Error: $error');
+                                    },
                                   ),
-                                  onBackgroundImageError: (error, stackTrace) {
-                                    // Handle errors gracefully
-                                    print('loading image Error: $error');
-                                  },
-                                ),
-                                SizedBox(
-                                  width: 10,
-                                ),
-                                Text(
-                                  UserInfo['followed_by'] ?? "",
-                                  style: TextStyle(
+                                  SizedBox(width: 10),
+                                  Text(
+                                    UserInfo['followed_by'] ?? "",
+                                    style: TextStyle(
                                       fontWeight: FontWeight.bold,
-                                      color: Color.fromARGB(255, 54, 43, 75)),
-                                ),
-                              ],
+                                      color: Color.fromARGB(255, 54, 43, 75),
+                                    ),
+                                  ),
+                                ],
+                              ),
                             ),
                           ),
-                        ),
-                      );
-                    },
-                  ),
+                        );
+                      },
+                    ),
           ),
         ],
       ),
@@ -136,11 +149,12 @@ class _FollowerlistDisplayState extends State<FollowerlistDisplay> {
 }
 
 Future<bool> checkCategorynameExists(String name) async {
-  final response = await Supabase.instance.client
-      .from('categories')
-      .select()
-      .eq('Name', name)
-      .maybeSingle();
+  final response =
+      await Supabase.instance.client
+          .from('categories')
+          .select()
+          .eq('Name', name)
+          .maybeSingle();
 
   if (response != null) {
     return true; // Username exists

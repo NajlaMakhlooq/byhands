@@ -1,4 +1,4 @@
-import 'package:byhands_application/theme.dart';
+import 'package:byhands/theme.dart';
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -28,44 +28,53 @@ class _AddnewchatState extends State<Addnewchat> {
     final email = user?.email;
 
     //use the email to search for username
-    final response = await supabase
-        .from('User')
-        .select()
-        .eq('Email', email ?? "")
-        .maybeSingle();
+    final response =
+        await supabase
+            .from('User')
+            .select()
+            .eq('Email', email ?? "")
+            .maybeSingle();
     setState(() {
       username = response?['Username'] ?? "Unknown User";
     });
-    print("user = ${username}");
+    print("user = $username");
 
-    final responsefollowing =
-        await supabase.from('Friendship').select().eq('followed_by', username);
+    final responsefollowing = await supabase
+        .from('Friendship')
+        .select()
+        .eq('followed_by', username);
     setState(() {
-      followingList = (responsefollowing as List<dynamic>?)
-              ?.map((e) => {
-                    'followed_by':
-                        e['followed_by'] ?? 'Unknown', // Handle null values
-                    'following_to':
-                        e['following_to'] ?? 'Unknown', // Handle null values
-                  })
+      followingList =
+          (responsefollowing as List<dynamic>?)
+              ?.map(
+                (e) => {
+                  'followed_by':
+                      e['followed_by'] ?? 'Unknown', // Handle null values
+                  'following_to':
+                      e['following_to'] ?? 'Unknown', // Handle null values
+                },
+              )
               .toList() ??
           [];
     });
     setState(() {
       displayedFollowing = followingList;
     });
-    print("List = ${followingList}");
+    print("List = $followingList");
   }
 
   void updateSearchQuery(String query) {
     setState(() {
       searchQuery = query;
-      displayedFollowing = followingList
-          .where((user) => user['following_to']
-              .toString()
-              .toLowerCase()
-              .contains(searchQuery.toLowerCase()))
-          .toList();
+      displayedFollowing =
+          followingList
+              .where(
+                (user) => user['following_to']
+                    .toString()
+                    .toLowerCase()
+                    .contains(searchQuery.toLowerCase()),
+              )
+              .toList();
     });
   }
 
@@ -74,7 +83,7 @@ class _AddnewchatState extends State<Addnewchat> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
-        title: const Text("Chat with"),
+        title: const Text("Start Chatting with"),
       ),
       body: Column(
         children: [
@@ -93,60 +102,76 @@ class _AddnewchatState extends State<Addnewchat> {
             ),
           ),
           Expanded(
-            child: displayedFollowing.isEmpty
-                ? Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(
-                          'No User found',
-                          style: Theme.of(context).textTheme.titleMedium,
-                        ),
-                      ],
-                    ),
-                  )
-                : ListView.builder(
-                    itemCount: displayedFollowing.length,
-                    itemBuilder: (context, index) {
-                      final UserInfo = displayedFollowing[index];
-                      return Padding(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 10, vertical: 5),
-                        child: Container(
-                          decoration: customContainerDecoration(context),
-                          child: ListTile(
-                            onTap: () {},
-                            contentPadding: EdgeInsets.symmetric(
-                                horizontal: 20, vertical: 5),
-                            title: Row(
-                              children: [
-                                CircleAvatar(
-                                  radius: 25,
-                                  backgroundImage: NetworkImage(
-                                    supabase.storage.from('images').getPublicUrl(
-                                        'images/profiles/${UserInfo['following_to']}/${UserInfo['following_to']}profile'),
+            child:
+                displayedFollowing.isEmpty
+                    ? Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            'No User found',
+                            style: Theme.of(context).textTheme.titleMedium,
+                          ),
+                        ],
+                      ),
+                    )
+                    : ListView.builder(
+                      itemCount: displayedFollowing.length,
+                      itemBuilder: (context, index) {
+                        final UserInfo = displayedFollowing[index];
+                        return Padding(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 10,
+                            vertical: 5,
+                          ),
+                          child: Container(
+                            decoration: customContainerDecoration(context),
+                            child: ListTile(
+                              onTap: () {},
+                              contentPadding: EdgeInsets.symmetric(
+                                horizontal: 20,
+                                vertical: 5,
+                              ),
+                              title: Row(
+                                children: [
+                                  CircleAvatar(
+                                    radius: 25,
+                                    backgroundColor: const Color.fromARGB(
+                                      255,
+                                      216,
+                                      222,
+                                      236,
+                                    ),
+                                    backgroundImage: NetworkImage(
+                                      supabase.storage
+                                          .from('images')
+                                          .getPublicUrl(
+                                            'images/profiles/${UserInfo['following_to']}/${UserInfo['following_to']}profile',
+                                          ),
+                                    ),
+                                    onBackgroundImageError: (
+                                      error,
+                                      stackTrace,
+                                    ) {
+                                      // Handle errors gracefully
+                                      print('loading image Error: $error');
+                                    },
                                   ),
-                                  onBackgroundImageError: (error, stackTrace) {
-                                    // Handle errors gracefully
-                                    print('loading image Error: $error');
-                                  },
-                                ),
-                                SizedBox(
-                                  width: 10,
-                                ),
-                                Text(
-                                  UserInfo['following_to'] ?? "",
-                                  style: TextStyle(
+                                  SizedBox(width: 10),
+                                  Text(
+                                    UserInfo['following_to'] ?? "",
+                                    style: TextStyle(
                                       fontWeight: FontWeight.bold,
-                                      color: Color.fromARGB(255, 54, 43, 75)),
-                                ),
-                              ],
+                                      color: Color.fromARGB(255, 54, 43, 75),
+                                    ),
+                                  ),
+                                ],
+                              ),
                             ),
                           ),
-                        ),
-                      );
-                    },
-                  ),
+                        );
+                      },
+                    ),
           ),
         ],
       ),
@@ -155,11 +180,12 @@ class _AddnewchatState extends State<Addnewchat> {
 }
 
 Future<bool> checkCategorynameExists(String name) async {
-  final response = await Supabase.instance.client
-      .from('categories')
-      .select()
-      .eq('Name', name)
-      .maybeSingle();
+  final response =
+      await Supabase.instance.client
+          .from('categories')
+          .select()
+          .eq('Name', name)
+          .maybeSingle();
 
   if (response != null) {
     return true; // Username exists

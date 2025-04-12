@@ -1,9 +1,12 @@
-import 'package:byhands_application/pages/main_pages/chats/addnewChat.dart';
-import 'package:byhands_application/pages/main_pages/chats/chatDetails.dart';
-import 'package:byhands_application/menus/mainmenu.dart';
-import 'package:byhands_application/theme.dart';
+import 'package:byhands/pages/main_pages/chats/addnewChat.dart';
+import 'package:byhands/pages/main_pages/chats/chatDetails.dart';
+import 'package:byhands/pages/menus/mainmenu.dart';
+import 'package:byhands/pages/menus/side_menu.dart';
+import 'package:byhands/theme.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
 
 class Chats extends StatefulWidget {
   const Chats({super.key});
@@ -13,7 +16,6 @@ class Chats extends StatefulWidget {
 }
 
 class _ChatsState extends State<Chats> {
-  final SupabaseClient supabase = Supabase.instance.client;
   List<Map<String, dynamic>> messages = [];
   List<Map<String, dynamic>> conversations = [];
   String username = "";
@@ -22,47 +24,87 @@ class _ChatsState extends State<Chats> {
   void initState() {
     super.initState();
     fetchUsername();
+    fetchConversations();
   }
 
   Future<void> fetchUsername() async {
-    // get the user email
-    final session = supabase.auth.currentSession;
-    final user = session?.user;
+    final user = FirebaseAuth.instance.currentUser;
     final email = user?.email;
+
     if (email == null) {
       setState(() {
-        username = "";
+        username = "No user logged in";
       });
       return;
     }
 
-    //use the email to search for the username
-    final response = await supabase
-        .from('User')
-        .select('Username')
-        .eq('Email', email)
-        .maybeSingle();
-    setState(() {
-      username = response?['Username'] ?? "";
-    });
-    print(username);
-    fetchConversations();
+    try {
+      // Fetch the user data from Firestore based on email
+      final userDoc =
+          await FirebaseFirestore.instance
+              .collection('Users')
+              .where('email', isEqualTo: email)
+              .limit(1)
+              .get();
+
+      if (userDoc.docs.isNotEmpty) {
+        // Assuming your Firestore collection stores the username field
+        setState(() {
+          username = userDoc.docs.first['username'] ?? "Unknown User";
+        });
+      } else {
+        setState(() {
+          username = "No user found in database";
+        });
+      }
+    } catch (e) {
+      setState(() {
+        username = "Error fetching username: $e";
+      });
+    }
+  }
+
+  Future<String> fetchUserImage(int index) async {
+    String usernameDisplayed = "";
+    final conversation = conversations[index];
+    if (conversation['username2'] == username) {
+      usernameDisplayed = conversation['username1'].toString();
+    } else {
+      usernameDisplayed = conversation['username2'].toString();
+    }
+    final path =
+        'images/profiles/$usernameDisplayed/${usernameDisplayed}profile';
+
+    final ref = FirebaseStorage.instance.ref().child(path);
+    final url = await ref.getDownloadURL();
+
+    return url;
   }
 
   // Fetch conversations from Supabase
   Future<List<Map<String, dynamic>>> fetchConversations() async {
-    final response = await supabase
-        .from('conversations')
-        .select()
-        .or('username1.eq.$username,username2.eq.$username');
+    final response =
+        await FirebaseFirestore.instance
+            .collection('Users')
+            .where(
+              Filter.or(
+                Filter('username1', isEqualTo: username),
+                Filter('username2', isEqualTo: username),
+              ),
+            )
+            .get();
+
     setState(() {
-      conversations = (response as List<dynamic>?)
-              ?.map((e) => {
-                    'id': e['id'] ?? 0,
-                    'username1': e['username1'] ?? 'Unknown',
-                    'username2': e['username2'] ?? 'Unknown',
-                    'created_at': e['created_at'] ?? '',
-                  })
+      conversations =
+          (response as List<dynamic>?)
+              ?.map(
+                (e) => {
+                  'id': e['id'] ?? 0,
+                  'username1': e['username1'] ?? 'Unknown',
+                  'username2': e['username2'] ?? 'Unknown',
+                  'created_at': e['created_at'] ?? '',
+                },
+              )
               .toList() ??
           [];
     });
@@ -85,24 +127,38 @@ class _ChatsState extends State<Chats> {
               onPressed: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(
-                    builder: (context) => Addnewchat(),
-                  ),
+                  MaterialPageRoute(builder: (context) => Addnewchat()),
                 );
               },
               child: Text(
                 "Add",
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: Color.fromARGB(255, 216, 222, 236),
-                    ),
+                  color: Color.fromARGB(255, 216, 222, 236),
+                ),
               ),
             ),
-          )
+          ),
         ],
         leading: Builder(
           builder: (BuildContext context) {
             return IconButton(
-              icon: const Icon(Icons.menu),
+              icon: Icon(
+                Icons.menu,
+                color:
+                    Theme.of(context).brightness == Brightness.dark
+                        ? const Color.fromARGB(
+                          255,
+                          135,
+                          128,
+                          139,
+                        ) // Dark mode color
+                        : const Color.fromARGB(
+                          255,
+                          203,
+                          194,
+                          205,
+                        ), // Light mode color
+              ),
               onPressed: () {
                 Scaffold.of(context).openDrawer();
               },
@@ -110,112 +166,105 @@ class _ChatsState extends State<Chats> {
           },
         ),
       ),
-      body: conversations.isEmpty
-          ? Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    'No conversations',
-                    style: Theme.of(context).textTheme.titleMedium,
-                  ),
-                  SizedBox(
-                    height: 15,
-                  ),
-                  SizedBox(
-                    width: 300,
-                    child: TextButton(
-                      style: buttonsDesign(context),
-                      onPressed: () {},
-                      child: Text(
-                        'Start new conversation...',
-                        style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                              color: Color.fromARGB(255, 216, 222, 236),
+      body:
+          conversations.isEmpty
+              ? Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      'No conversations',
+                      style: Theme.of(context).textTheme.titleMedium,
+                    ),
+                    SizedBox(height: 15),
+                    SizedBox(
+                      width: 300,
+                      child: TextButton(
+                        style: buttonsDesign(context),
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => Addnewchat(),
                             ),
+                          );
+                        },
+                        child: Text(
+                          'Start new conversation...',
+                          style: Theme.of(
+                            context,
+                          ).textTheme.titleSmall?.copyWith(
+                            color: Color.fromARGB(255, 216, 222, 236),
+                          ),
+                        ),
                       ),
                     ),
-                  )
-                ],
-              ),
-            )
-          : ListView.builder(
-              itemCount: conversations.length,
-              itemBuilder: (context, index) {
-                final conversation = conversations[index];
-                return Padding(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                  child: Container(
-                    height: 80,
-                    decoration: ChatsContainerDecoration(context),
-                    child: ListTile(
+                  ],
+                ),
+              )
+              : ListView.builder(
+                itemCount: conversations.length,
+                itemBuilder: (context, index) {
+                  final conversation = conversations[index];
+                  return Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 5,
+                    ),
+                    child: Container(
+                      height: 80,
+                      decoration: ChatsContainerDecoration(context),
+                      child: ListTile(
                         onTap: () {
                           String conversationId = conversation['id'].toString();
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (context) => ChatDetailScreen(
-                                  conversationId: conversationId),
+                              builder:
+                                  (context) => ChatDetailScreen(
+                                    conversationId: conversationId,
+                                  ),
                             ),
                           );
                         },
-                        contentPadding:
-                            EdgeInsets.symmetric(horizontal: 20, vertical: 7),
-                        title: conversation['username2'] == username
-                            ? Row(
-                                children: [
-                                  CircleAvatar(
-                                    radius: 25,
-                                    backgroundImage: NetworkImage(
-                                      supabase.storage.from('images').getPublicUrl(
-                                          'images/profiles/${conversation['username1']}/${conversation['username1']}profile'),
-                                    ),
-                                    onBackgroundImageError:
-                                        (error, stackTrace) {
-                                      // Handle errors gracefully
-                                      print('loading image Error: $error');
-                                    },
-                                  ),
-                                  SizedBox(
-                                    width: 10,
-                                  ),
-                                  Text(
-                                    conversation['username1'] ?? " ",
-                                    style: TextStyle(
-                                        fontWeight: FontWeight.bold,
-                                        color: Color.fromARGB(255, 54, 43, 75)),
-                                  ),
-                                ],
-                              )
-                            : Row(
-                                children: [
-                                  CircleAvatar(
-                                    radius: 25,
-                                    backgroundImage: NetworkImage(
-                                      supabase.storage.from('images').getPublicUrl(
-                                          'images/profiles/${conversation['username2']}/${conversation['username2']}profile'),
-                                    ),
-                                    onBackgroundImageError:
-                                        (error, stackTrace) {
-                                      // Handle errors gracefully
-                                      print('loading image Error: $error');
-                                    },
-                                  ),
-                                  SizedBox(
-                                    width: 10,
-                                  ),
-                                  Text(
-                                    conversation['username2'] ?? " ",
-                                    style: TextStyle(
-                                        fontWeight: FontWeight.bold,
-                                        color: Color.fromARGB(255, 54, 43, 75)),
-                                  ),
-                                ],
-                              )),
-                  ),
-                );
-              },
-            ),
+                        contentPadding: EdgeInsets.symmetric(
+                          horizontal: 20,
+                          vertical: 7,
+                        ),
+                        title: Row(
+                          children: [
+                            CircleAvatar(
+                              radius: 25,
+                              backgroundColor: const Color.fromARGB(
+                                255,
+                                216,
+                                222,
+                                236,
+                              ),
+                              backgroundImage: NetworkImage(
+                                fetchUserImage(index) as String,
+                              ),
+                              onBackgroundImageError: (error, stackTrace) {
+                                // Handle errors gracefully
+                                print('loading image Error: $error');
+                              },
+                            ),
+                            SizedBox(width: 10),
+                            Text(
+                              conversation['username1'] ?? " ",
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                color: Color.fromARGB(255, 54, 43, 75),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  );
+                },
+              ),
+      drawer: CommonDrawer(),
       bottomNavigationBar: mainMenu(4),
     );
   }

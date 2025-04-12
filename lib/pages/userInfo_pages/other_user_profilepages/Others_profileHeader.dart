@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:byhands_application/pages/userInfo_pages/profile_pages/editProfile.dart';
+import 'package:byhands/pages/userInfo_pages/profile_pages/editProfile.dart';
 
 class Others_profileHeader extends StatefulWidget {
   const Others_profileHeader({super.key, required this.username});
@@ -15,9 +15,9 @@ class _Others_profileHeader extends State<Others_profileHeader> {
   String Bio = "";
   String userId = "";
   String url_profile = "";
-  int postNum = 0;
-  int follower = 0;
-  int following = 0;
+  List<dynamic> followerList = [];
+  List<dynamic> followingList = [];
+  List<dynamic> postList = [];
 
   @override
   void initState() {
@@ -28,8 +28,11 @@ class _Others_profileHeader extends State<Others_profileHeader> {
   Future<void> fetchInformation() async {
     Future<void> getURL() async {
       // Get the public URL for the specified file
-      final response = await supabase.storage.from('images').getPublicUrl(
-          'images/profiles/${widget.username}/${widget.username}profile');
+      final response = supabase.storage
+          .from('images')
+          .getPublicUrl(
+            'images/profiles/${widget.username}/${widget.username}profile',
+          );
       setState(() {
         url_profile = response;
       });
@@ -37,19 +40,15 @@ class _Others_profileHeader extends State<Others_profileHeader> {
 
     await getURL();
     // Use the email to search for information in the User table
-    final response = await supabase
-        .from('User')
-        .select()
-        .eq('Username', widget.username)
-        .maybeSingle();
+    final response =
+        await supabase
+            .from('User')
+            .select()
+            .eq('Username', widget.username)
+            .maybeSingle();
 
     if (response == null) {
       print("User data not found.");
-      setState(() {
-        postNum = 0;
-        follower = 0;
-        following = 0;
-      });
       return;
     }
 
@@ -60,38 +59,65 @@ class _Others_profileHeader extends State<Others_profileHeader> {
     });
 
     print("UserID: $userId");
-
     // Query the Friendship table for follower count
     final responsefollower = await supabase
         .from('Friendship')
         .select()
-        .eq('followerID', userId)
-        .count();
-
-    print("follower : $responsefollower");
+        .eq('following_to', widget.username);
+    setState(() {
+      followerList =
+          (responsefollower as List<dynamic>?)
+              ?.map(
+                (e) => {
+                  'following_to':
+                      e['following_to'] ?? 'Unknown', // Handle null values
+                  'followed_by':
+                      e['followed_by'] ?? 'Unknown', // Handle null values
+                },
+              )
+              .toList() ??
+          [];
+    });
+    print("follower : ${followerList.length}");
 
     // Query the Friendship table for following count
     final responsefollowing = await supabase
         .from('Friendship')
         .select()
-        .eq('followedID', userId)
-        .count();
-    print("following : $responsefollowing");
+        .eq('followed_by', widget.username);
+    setState(() {
+      followingList =
+          (responsefollowing as List<dynamic>?)
+              ?.map(
+                (e) => {
+                  'followed_by':
+                      e['followed_by'] ?? 'Unknown', // Handle null values
+                  'following_to':
+                      e['following_to'] ?? 'Unknown', // Handle null values
+                },
+              )
+              .toList() ??
+          [];
+    });
+    print("following : ${followingList.length}");
 
     // Query the Post table for the number of posts
-    final responsePosts =
-        await supabase.from('Post').select().eq('UserID', userId).count();
-
-    print("Follower Count: ${responsefollower.count}");
-    print("Following Count: ${responsefollowing.count}");
-    print("Post Count: ${responsePosts.count}");
-
-    // Update state with fetched counts
+    final responsePosts = await supabase
+        .from('Post')
+        .select()
+        .eq('username', widget.username);
     setState(() {
-      postNum = responsePosts.count;
-      follower = responsefollower.count;
-      following = responsefollowing.count;
+      postList =
+          (responsePosts as List<dynamic>?)
+              ?.map(
+                (e) => {
+                  'username': e['username'] ?? 'Unknown', // Handle null values
+                },
+              )
+              .toList() ??
+          [];
     });
+    print("follower : ${postList.length}");
   }
 
   @override
@@ -107,7 +133,7 @@ class _Others_profileHeader extends State<Others_profileHeader> {
               alignment: Alignment.bottomRight,
               children: [
                 CircleAvatar(
-                  radius: 50,
+                  radius: 60,
                   backgroundImage: NetworkImage(url_profile),
                   onBackgroundImageError: (error, stackTrace) {
                     // Handle errors gracefully
@@ -119,9 +145,7 @@ class _Others_profileHeader extends State<Others_profileHeader> {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => Edit(
-                          userName: widget.username,
-                        ),
+                        builder: (context) => Edit(userName: widget.username),
                       ),
                     );
                   },
@@ -135,43 +159,36 @@ class _Others_profileHeader extends State<Others_profileHeader> {
             ),
           ),
           Padding(
-              padding: const EdgeInsets.all(7.0),
-              child: Column(
-                children: [
-                  Text(
-                    widget.username,
-                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
-                  ),
-                  Text(
-                    Bio,
-                    style: TextStyle(fontSize: 16),
-                  ),
-                ],
-              )),
+            padding: const EdgeInsets.all(7.0),
+            child: Column(
+              children: [
+                Text(
+                  widget.username,
+                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
+                ),
+                Text(Bio, style: TextStyle(fontSize: 16)),
+              ],
+            ),
+          ),
           Divider(),
           NumbersWidget(),
           Divider(),
-          const SizedBox(
-            height: 10,
-          ),
+          const SizedBox(height: 10),
         ],
       ),
     );
   }
 
   Widget NumbersWidget() => Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          buildButton(text: 'Posts', value: postNum),
-          buildButton(text: 'Followers', value: follower),
-          buildButton(text: 'Following', value: following),
-        ],
-      );
+    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    children: [
+      buildButton(text: 'Posts', value: postList.length),
+      buildButton(text: 'Followers', value: followerList.length),
+      buildButton(text: 'Following', value: followingList.length),
+    ],
+  );
 
-  Widget buildButton({
-    required String text,
-    required int value,
-  }) =>
+  Widget buildButton({required String text, required int value}) =>
       MaterialButton(
         padding: EdgeInsets.symmetric(vertical: 4),
         onPressed: () {},
@@ -184,13 +201,8 @@ class _Others_profileHeader extends State<Others_profileHeader> {
               '$value',
               style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
             ),
-            SizedBox(
-              height: 2,
-            ),
-            Text(
-              text,
-              style: TextStyle(fontSize: 12),
-            ),
+            SizedBox(height: 2),
+            Text(text, style: TextStyle(fontSize: 12)),
           ],
         ),
       );

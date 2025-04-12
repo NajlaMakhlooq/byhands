@@ -1,9 +1,9 @@
-import 'package:byhands_application/menus/mainmenu.dart';
-import 'package:byhands_application/theme.dart';
+import 'package:byhands/pages/menus/mainmenu.dart';
+import 'package:byhands/theme.dart';
 import 'package:flutter/material.dart';
-import 'package:byhands_application/menus/side_menu.dart';
+import 'package:byhands/pages/menus/side_menu.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:byhands_application/pop_up/Course_details.dart';
+import 'package:byhands/pages/pop_up/Course_details.dart';
 
 class Courses extends StatefulWidget {
   const Courses({super.key});
@@ -28,12 +28,15 @@ class _CoursesState extends State<Courses> {
     try {
       final response = await supabase.from('Courses').select();
       setState(() {
-        allCourses = (response as List<dynamic>?)
-                ?.map((e) => {
-                      'Name': e['Name'] ?? 'Unknown', // Handle null values
-                      'Description':
-                          e['Description'] ?? 'No description available'
-                    })
+        allCourses =
+            (response as List<dynamic>?)
+                ?.map(
+                  (e) => {
+                    'Name': e['Name'] ?? 'Unknown', // Handle null values
+                    'Description':
+                        e['Description'] ?? 'No description available',
+                  },
+                )
                 .toList() ??
             [];
 
@@ -47,12 +50,14 @@ class _CoursesState extends State<Courses> {
   void updateSearchQuery(String query) {
     setState(() {
       searchQuery = query;
-      displayedCourses = allCourses
-          .where((course) => course['Name']
-              .toString()
-              .toLowerCase()
-              .contains(searchQuery.toLowerCase()))
-          .toList();
+      displayedCourses =
+          allCourses
+              .where(
+                (course) => course['Name'].toString().toLowerCase().contains(
+                  searchQuery.toLowerCase(),
+                ),
+              )
+              .toList();
     });
   }
 
@@ -65,16 +70,35 @@ class _CoursesState extends State<Courses> {
         title: Text("Courses", style: Theme.of(context).textTheme.titleLarge),
         actions: <Widget>[
           TextButton(
-              onPressed: () {
-                Navigator.pushNamed(context, '/add_course');
-              },
-              child: Text("+ new course",
-                  style: Theme.of(context).textTheme.bodyMedium))
+            onPressed: () {
+              Navigator.pushNamed(context, '/add_course');
+            },
+            child: Text(
+              "+ new course",
+              style: Theme.of(context).textTheme.bodyMedium,
+            ),
+          ),
         ],
         leading: Builder(
           builder: (BuildContext context) {
             return IconButton(
-              icon: const Icon(Icons.menu),
+              icon: Icon(
+                Icons.menu,
+                color:
+                    Theme.of(context).brightness == Brightness.dark
+                        ? const Color.fromARGB(
+                          255,
+                          135,
+                          128,
+                          139,
+                        ) // Dark mode color
+                        : const Color.fromARGB(
+                          255,
+                          203,
+                          194,
+                          205,
+                        ), // Light mode color
+              ),
               onPressed: () {
                 Scaffold.of(context).openDrawer();
               },
@@ -99,68 +123,90 @@ class _CoursesState extends State<Courses> {
               ),
             ),
           ),
-          SizedBox(
-            height: 15,
-          ),
+          SizedBox(height: 15),
           Expanded(
-            child: displayedCourses.isEmpty
-                ? Center(child: CircularProgressIndicator())
-                : ListView.builder(
-                    itemCount: displayedCourses.length,
-                    itemBuilder: (context, index) {
-                      final course = displayedCourses[index];
-                      return Padding(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 10, vertical: 5),
-                        child: Container(
-                          decoration: customContainerDecoration(context),
-                          child: ListTile(
-                            onTap: () {
-                              String courseName = course['Name'];
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => CourseDetailPage(
-                                    courseName: courseName,
+            child:
+                displayedCourses.isEmpty
+                    ? Center(child: CircularProgressIndicator())
+                    : ListView.builder(
+                      itemCount: displayedCourses.length,
+                      itemBuilder: (context, index) {
+                        final course = displayedCourses[index];
+                        return Padding(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 10,
+                            vertical: 5,
+                          ),
+                          child: Container(
+                            decoration: customContainerDecoration(context),
+                            child: ListTile(
+                              onTap: () {
+                                String courseName = course['Name'];
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder:
+                                        (context) => CourseDetailPage(
+                                          courseName: courseName,
+                                        ),
                                   ),
-                                ),
-                              );
-                            },
-                            contentPadding: EdgeInsets.symmetric(
-                                horizontal: 20, vertical: 10),
-                            title: Row(
-                              children: [
-                                Image.network(
-                                  supabase.storage.from('images').getPublicUrl(
-                                      'courses/${course['Name']}'),
-                                  width: 50, // Increased size for visibility
-                                  height: 50,
-                                  loadingBuilder:
-                                      (context, child, loadingProgress) {
-                                    if (loadingProgress == null) return child;
-                                    return CircularProgressIndicator(); // Loading spinner
-                                  },
-                                  errorBuilder: (context, error, stackTrace) {
-                                    return Icon(
-                                      Icons.image_not_supported,
-                                      size: 50,
-                                    ); // Fallback if image fails to load
-                                  },
-                                ),
-                                SizedBox(
-                                  width: 10,
-                                ),
-                                Text(
-                                  course['Name'] ?? 'Unknown Course',
-                                  style: Theme.of(context).textTheme.bodyLarge,
-                                ),
-                              ],
+                                );
+                              },
+                              contentPadding: EdgeInsets.symmetric(
+                                horizontal: 20,
+                                vertical: 2,
+                              ),
+                              title: Row(
+                                children: [
+                                  Container(
+                                    decoration: BoxDecoration(
+                                      shape: BoxShape.circle,
+                                      border: Border.all(
+                                        color: Color.fromARGB(
+                                          255,
+                                          216,
+                                          222,
+                                          236,
+                                        ), // You can set your desired border color here
+                                        width: 2, // Set the width of the border
+                                      ),
+                                    ),
+                                    child: CircleAvatar(
+                                      radius: 30,
+                                      backgroundColor: const Color.fromARGB(
+                                        255,
+                                        216,
+                                        222,
+                                        236,
+                                      ),
+                                      backgroundImage: NetworkImage(
+                                        supabase.storage
+                                            .from('images')
+                                            .getPublicUrl(
+                                              'courses/${course['Name']}',
+                                            ),
+                                      ),
+                                      onBackgroundImageError: (
+                                        error,
+                                        stackTrace,
+                                      ) {
+                                        print('Error loading image: $error');
+                                      },
+                                    ),
+                                  ),
+                                  SizedBox(width: 10),
+                                  Text(
+                                    course['Name'] ?? 'Unknown Course',
+                                    style:
+                                        Theme.of(context).textTheme.bodyLarge,
+                                  ),
+                                ],
+                              ),
                             ),
                           ),
-                        ),
-                      );
-                    },
-                  ),
+                        );
+                      },
+                    ),
           ),
         ],
       ),

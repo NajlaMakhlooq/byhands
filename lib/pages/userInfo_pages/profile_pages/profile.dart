@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:byhands_application/menus/side_menu.dart';
-import 'package:byhands_application/pages/userInfo_pages/profile_pages/profileHeader.dart';
-import 'package:byhands_application/pages/userInfo_pages/profile_pages/Usercourses.dart';
-import 'package:byhands_application/pages/userInfo_pages/profile_pages/posts.dart';
+import 'package:byhands/pages/menus/side_menu.dart';
+import 'package:byhands/pages/userInfo_pages/profile_pages/profileHeader.dart';
+import 'package:byhands/pages/userInfo_pages/profile_pages/Usercourses.dart';
+import 'package:byhands/pages/userInfo_pages/profile_pages/posts.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 // ignore: must_be_immutable
@@ -14,7 +14,8 @@ class Profile extends StatefulWidget {
 }
 
 class _ProfileState extends State<Profile> {
-  final SupabaseClient supabase = Supabase.instance.client;
+  final SupabaseClient supabase = Supabase.instance.client; // open the database
+  bool loading = true; // Add loading state
   String username = "";
   bool profileHeaderCheck = false;
 
@@ -25,10 +26,10 @@ class _ProfileState extends State<Profile> {
   }
 
   Future<void> fetchUsername() async {
-    // get the user email
     final session = supabase.auth.currentSession;
     final user = session?.user;
     final email = user?.email;
+
     if (email == null) {
       setState(() {
         username = "No user logged in";
@@ -36,19 +37,74 @@ class _ProfileState extends State<Profile> {
       return;
     }
 
-    //use the email to search for the username
-    final response = await supabase
-        .from('User')
-        .select('Username')
-        .eq('Email', email)
-        .maybeSingle();
+    final response =
+        await supabase
+            .from('User')
+            .select('Username')
+            .eq('Email', email)
+            .maybeSingle();
+
     setState(() {
       username = response?['Username'] ?? "Unknown User";
+    });
+
+    setState(() {
+      loading = false; // Set loading to false once done
     });
   }
 
   @override
   Widget build(BuildContext context) {
+    // Show a loading indicator if data is not yet fetched
+    if (loading) {
+      return Center(
+        child: Scaffold(
+          backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+          appBar: AppBar(
+            backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
+            title: Text(" $username Profile"),
+            shadowColor: Color.fromARGB(255, 54, 43, 75),
+            actions: <Widget>[
+              IconButton(
+                onPressed: () {
+                  Navigator.popAndPushNamed(context, '/Home');
+                },
+                icon: const Icon(Icons.home),
+              ),
+            ],
+            leading: Builder(
+              builder: (BuildContext context) {
+                return IconButton(
+                  icon: Icon(
+                    Icons.menu,
+                    color:
+                        Theme.of(context).brightness == Brightness.dark
+                            ? const Color.fromARGB(
+                              255,
+                              135,
+                              128,
+                              139,
+                            ) // Dark mode color
+                            : const Color.fromARGB(
+                              255,
+                              203,
+                              194,
+                              205,
+                            ), // Light mode color
+                  ),
+                  onPressed: () {
+                    Scaffold.of(context).openDrawer();
+                  },
+                );
+              },
+            ),
+          ),
+          body: Center(child: CircularProgressIndicator()),
+        ),
+      );
+    }
+
+    // Once data is loaded, render the drawer
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
@@ -57,15 +113,32 @@ class _ProfileState extends State<Profile> {
         shadowColor: Color.fromARGB(255, 54, 43, 75),
         actions: <Widget>[
           IconButton(
-              onPressed: () {
-                Navigator.popAndPushNamed(context, '/Home');
-              },
-              icon: const Icon(Icons.home))
+            onPressed: () {
+              Navigator.popAndPushNamed(context, '/Home');
+            },
+            icon: const Icon(Icons.home),
+          ),
         ],
         leading: Builder(
           builder: (BuildContext context) {
             return IconButton(
-              icon: const Icon(Icons.menu),
+              icon: Icon(
+                Icons.menu,
+                color:
+                    Theme.of(context).brightness == Brightness.dark
+                        ? const Color.fromARGB(
+                          255,
+                          135,
+                          128,
+                          139,
+                        ) // Dark mode color
+                        : const Color.fromARGB(
+                          255,
+                          203,
+                          194,
+                          205,
+                        ), // Light mode color
+              ),
               onPressed: () {
                 Scaffold.of(context).openDrawer();
               },
@@ -73,19 +146,24 @@ class _ProfileState extends State<Profile> {
           },
         ),
       ),
-      body: DefaultTabController(
-        length: 2,
-        child: username.isEmpty
-            ? Center(child: CircularProgressIndicator())
-            : NestedScrollView(
+      body: buildHeader(context),
+      drawer: CommonDrawer(),
+    );
+  }
+
+  Widget buildHeader(BuildContext context) {
+    return DefaultTabController(
+      length: 2,
+      child:
+          username.isEmpty
+              ? Center(child: CircularProgressIndicator())
+              : NestedScrollView(
                 headerSliverBuilder: (context, _) {
                   return [
                     SliverList(
-                      delegate: SliverChildListDelegate(
-                        [
-                          profileHeader(),
-                        ],
-                      ),
+                      delegate: SliverChildListDelegate([
+                        profileHeader(username: username),
+                      ]),
                     ),
                   ];
                 },
@@ -99,32 +177,24 @@ class _ProfileState extends State<Profile> {
                         indicatorWeight: 1,
                         indicatorColor: Colors.black,
                         tabs: [
-                          Tab(
-                            icon: Icon(Icons.image),
-                          ),
-                          Tab(
-                            icon: Icon(
-                              Icons.book,
-                            ),
-                          ),
+                          Tab(icon: Icon(Icons.image)),
+                          Tab(icon: Icon(Icons.book)),
                         ],
                       ),
                     ),
                     username.isEmpty
                         ? Center(child: CircularProgressIndicator())
                         : Expanded(
-                            child: TabBarView(
-                              children: [
-                                Posts(userName: username),
-                                Courses(userName: username),
-                              ],
-                            ),
+                          child: TabBarView(
+                            children: [
+                              Posts(userName: username),
+                              Courses(userName: username),
+                            ],
                           ),
+                        ),
                   ],
                 ),
               ),
-      ),
-      drawer: CommonDrawer(),
     );
   }
 }

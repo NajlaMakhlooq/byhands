@@ -1,6 +1,6 @@
-import 'package:byhands_application/theme.dart';
+import 'package:byhands/theme.dart';
 import 'package:flutter/material.dart';
-import 'package:byhands_application/menus/side_menu.dart';
+import 'package:byhands/pages/menus/side_menu.dart';
 
 class App_Overview extends StatelessWidget {
   const App_Overview({super.key});
@@ -18,16 +18,30 @@ class App_Overview extends StatelessWidget {
               Navigator.popAndPushNamed(context, '/Home');
             },
             icon: const Icon(Icons.home),
-          )
+          ),
         ],
         leading: IconButton(
-            onPressed: () {
-              Navigator.pop(context);
-            },
-            icon: Icon(
-              Icons.arrow_back,
-              color: Color.fromARGB(255, 54, 43, 75),
-            )),
+          onPressed: () {
+            Navigator.pop(context);
+          },
+          icon: Icon(
+            Icons.arrow_back,
+            color:
+                Theme.of(context).brightness == Brightness.dark
+                    ? const Color.fromARGB(
+                      255,
+                      135,
+                      128,
+                      139,
+                    ) // Dark mode color
+                    : const Color.fromARGB(
+                      255,
+                      203,
+                      194,
+                      205,
+                    ), // Light mode color
+          ),
+        ),
       ),
       drawer: CommonDrawer(),
       body: ListView(
@@ -43,9 +57,7 @@ class App_Overview extends StatelessWidget {
               ),
             ),
           ),
-          SizedBox(
-            height: 6,
-          ),
+          SizedBox(height: 6),
           Container(
             decoration: customContainerDecoration(context),
             child: Padding(

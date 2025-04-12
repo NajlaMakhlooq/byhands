@@ -1,7 +1,7 @@
-import 'package:byhands_application/pop_up/Notification_details.dart';
-import 'package:byhands_application/theme.dart';
+import 'package:byhands/pages/pop_up/Notification_details.dart';
+import 'package:byhands/theme.dart';
 import 'package:flutter/material.dart';
-import 'package:byhands_application/menus/side_menu.dart';
+import 'package:byhands/pages/menus/side_menu.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 // ignore: camel_case_types
@@ -44,11 +44,12 @@ class _Notifications extends State<Notifications> {
       }
 
       // Fetch UserID based on the email
-      final response = await supabase
-          .from('User')
-          .select('UserID')
-          .eq('Email', email)
-          .maybeSingle();
+      final response =
+          await supabase
+              .from('User')
+              .select('UserID')
+              .eq('Email', email)
+              .maybeSingle();
 
       if (response != null && response.containsKey('UserID')) {
         setState(() {
@@ -74,20 +75,24 @@ class _Notifications extends State<Notifications> {
   Future<void> fetchNotifications() async {
     try {
       // Fetch liked course IDs for the user
-      final response =
-          await supabase.from('Notifications').select().eq('user_id', userid);
+      final response = await supabase
+          .from('Notifications')
+          .select()
+          .eq('user_id', userid);
 
-      List<String> noti_title = (response as List<dynamic>?)
+      List<String> noti_title =
+          (response as List<dynamic>?)
               ?.map((e) => e['title'] as String)
               .toList() ??
           [];
 
       for (String title in noti_title) {
-        final courseResponse = await supabase
-            .from('Notifications')
-            .select()
-            .eq('title', title)
-            .single();
+        final courseResponse =
+            await supabase
+                .from('Notifications')
+                .select()
+                .eq('title', title)
+                .single();
 
         Notifications.add(courseResponse);
       }
@@ -117,7 +122,23 @@ class _Notifications extends State<Notifications> {
         leading: Builder(
           builder: (BuildContext context) {
             return IconButton(
-              icon: const Icon(Icons.menu),
+              icon: Icon(
+                Icons.menu,
+                color:
+                    Theme.of(context).brightness == Brightness.dark
+                        ? const Color.fromARGB(
+                          255,
+                          135,
+                          128,
+                          139,
+                        ) // Dark mode color
+                        : const Color.fromARGB(
+                          255,
+                          203,
+                          194,
+                          205,
+                        ), // Light mode color
+              ),
               onPressed: () {
                 Scaffold.of(context).openDrawer();
               },
@@ -126,66 +147,85 @@ class _Notifications extends State<Notifications> {
         ),
       ),
       drawer: CommonDrawer(),
-      body: isLoading
-          ? Center(child: CircularProgressIndicator()) // Show loading indicator
-          : Column(
-              children: [
-                Expanded(
-                  child: Notifications.isEmpty
-                      ? Center(
-                          child: Text(
-                          'No Notifications.',
-                          style: Theme.of(context).textTheme.bodyLarge,
-                        ))
-                      : ListView.builder(
-                          itemCount: Notifications.length,
-                          itemBuilder: (context, index) {
-                            final titleNotification = Notifications[index];
-                            return Padding(
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 10, vertical: 5),
-                              child: Container(
-                                decoration: customContainerDecoration(context),
-                                child: ListTile(
-                                  onTap: () {
-                                    String title = titleNotification['title'];
-                                    Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder: (context) =>
-                                            NotificationDetailPage(
-                                          title: title,
-                                        ),
-                                      ),
-                                    );
-                                  },
-                                  contentPadding: EdgeInsets.symmetric(
-                                      horizontal: 20, vertical: 10),
-                                  title: Row(
-                                    children: [
-                                      Icon(
-                                        Icons.notifications,
-                                        size: 30,
-                                        color: Color.fromARGB(255, 54, 43, 75),
-                                      ),
-                                      SizedBox(
-                                        width: 10,
-                                      ),
-                                      Text(
-                                          titleNotification['title'].toString(),
-                                          style: Theme.of(context)
-                                              .textTheme
-                                              .bodyLarge),
-                                    ],
-                                  ),
-                                ),
+      body:
+          isLoading
+              ? Center(
+                child: CircularProgressIndicator(),
+              ) // Show loading indicator
+              : Column(
+                children: [
+                  Expanded(
+                    child:
+                        Notifications.isEmpty
+                            ? Center(
+                              child: Text(
+                                'No Notifications.',
+                                style: Theme.of(context).textTheme.bodyLarge,
                               ),
-                            );
-                          },
-                        ),
-                ),
-              ],
-            ),
+                            )
+                            : ListView.builder(
+                              itemCount: Notifications.length,
+                              itemBuilder: (context, index) {
+                                final titleNotification = Notifications[index];
+                                return Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 10,
+                                    vertical: 5,
+                                  ),
+                                  child: Container(
+                                    decoration: customContainerDecoration(
+                                      context,
+                                    ),
+                                    child: ListTile(
+                                      onTap: () {
+                                        String title =
+                                            titleNotification['title'];
+                                        Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                            builder:
+                                                (context) =>
+                                                    NotificationDetailPage(
+                                                      title: title,
+                                                    ),
+                                          ),
+                                        );
+                                      },
+                                      contentPadding: EdgeInsets.symmetric(
+                                        horizontal: 20,
+                                        vertical: 10,
+                                      ),
+                                      title: Row(
+                                        children: [
+                                          Icon(
+                                            Icons.notifications,
+                                            size: 30,
+                                            color: Color.fromARGB(
+                                              255,
+                                              54,
+                                              43,
+                                              75,
+                                            ),
+                                          ),
+                                          SizedBox(width: 10),
+                                          Text(
+                                            titleNotification['title']
+                                                .toString(),
+                                            style:
+                                                Theme.of(
+                                                  context,
+                                                ).textTheme.bodyLarge,
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                );
+                              },
+                            ),
+                  ),
+                ],
+              ),
     );
   }
 }

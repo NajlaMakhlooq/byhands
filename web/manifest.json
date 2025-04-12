@@ -1,6 +1,6 @@
 {
-    "name": "byhands_application",
-    "short_name": "byhands_application",
+    "name": "byhands",
+    "short_name": "byhands",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",

@@ -1,13 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:byhands_application/menus/side_menu.dart';
+import 'package:byhands/pages/menus/side_menu.dart';
 
 class SettingsPage extends StatefulWidget {
   final VoidCallback toggleThemeMode;
 
-  const SettingsPage({
-    super.key,
-    required this.toggleThemeMode,
-  });
+  const SettingsPage({super.key, required this.toggleThemeMode});
 
   @override
   State<SettingsPage> createState() => _SettingsPageState();
@@ -17,10 +14,7 @@ class _SettingsPageState extends State<SettingsPage> {
   bool isDarkMode = false; // Tracks the state of the switch
   String selectedLanguage = 'en'; // Default language
 
-  final Map<String, String> languages = {
-    'en': 'English',
-    'ar': 'العربية',
-  };
+  final Map<String, String> languages = {'en': 'English', 'ar': 'العربية'};
 
   @override
   Widget build(BuildContext context) {
@@ -44,9 +38,22 @@ class _SettingsPageState extends State<SettingsPage> {
           onPressed: () {
             Navigator.pop(context);
           },
-          icon: const Icon(
+          icon: Icon(
             Icons.arrow_back,
-            color: Color.fromARGB(255, 54, 43, 75),
+            color:
+                Theme.of(context).brightness == Brightness.dark
+                    ? const Color.fromARGB(
+                      255,
+                      135,
+                      128,
+                      139,
+                    ) // Dark mode color
+                    : const Color.fromARGB(
+                      255,
+                      203,
+                      194,
+                      205,
+                    ), // Light mode color
           ),
         ),
       ),
@@ -54,18 +61,12 @@ class _SettingsPageState extends State<SettingsPage> {
       body: ListView(
         padding: const EdgeInsets.all(16.0),
         children: <Widget>[
-          Text(
-            "Settings",
-            style: Theme.of(context).textTheme.titleLarge,
-          ),
+          Text("Settings", style: Theme.of(context).textTheme.titleLarge),
           const Divider(),
           Row(
             mainAxisAlignment: MainAxisAlignment.start,
             children: [
-              Text(
-                'Dark Mode',
-                style: Theme.of(context).textTheme.titleMedium,
-              ),
+              Text('Dark Mode', style: Theme.of(context).textTheme.titleMedium),
               const SizedBox(width: 10),
               Switch(
                 value: isDarkMode,
@@ -79,16 +80,10 @@ class _SettingsPageState extends State<SettingsPage> {
             ],
           ),
           const SizedBox(height: 20),
-          Text(
-            'Language',
-            style: Theme.of(context).textTheme.titleMedium,
-          ),
+          Text('Language', style: Theme.of(context).textTheme.titleMedium),
           const SizedBox(height: 10),
           const SizedBox(height: 20),
-          Text(
-            "Privacy Policy",
-            style: Theme.of(context).textTheme.titleLarge,
-          ),
+          Text("Privacy Policy", style: Theme.of(context).textTheme.titleLarge),
           const Divider(),
           Text(
             "1. Introduction",

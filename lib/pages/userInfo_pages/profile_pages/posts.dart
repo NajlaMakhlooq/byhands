@@ -1,5 +1,5 @@
-import 'package:byhands_application/pop_up/Post_detail.dart';
-import 'package:byhands_application/theme.dart';
+import 'package:byhands/pages/pop_up/Post_detail.dart';
+import 'package:byhands/theme.dart';
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -12,7 +12,8 @@ class Posts extends StatefulWidget {
 }
 
 class _PostsState extends State<Posts> {
-  final SupabaseClient supabase = Supabase.instance.client;
+  final SupabaseClient supabase = Supabase.instance.client; // open the database
+
   List<Map<String, dynamic>> posts = [];
   bool isLoading = true;
   int userId = 0;
@@ -29,14 +30,15 @@ class _PostsState extends State<Posts> {
 
   Future<void> fetchPosts() async {
     try {
-      final response =
-          await supabase.from('Post').select().eq('username', widget.userName);
+      final response = await supabase
+          .from('Post')
+          .select()
+          .eq('username', widget.userName);
 
-      posts = (response as List<dynamic>)
-          .map((post) => {
-                'Name': post['Name'] ?? 'Unknown',
-              })
-          .toList();
+      posts =
+          (response as List<dynamic>)
+              .map((post) => {'Name': post['Name'] ?? 'Unknown'})
+              .toList();
     } catch (error) {
       print('Error fetching Courses: $error');
     } finally {
@@ -48,23 +50,23 @@ class _PostsState extends State<Posts> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-      body: isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : posts.isEmpty
-              ? Center(
-                  child: Text('No Posts provided.'),
-                )
-              : ListView.builder(
-                  padding: const EdgeInsets.all(10),
-                  itemCount: posts.length,
-                  itemBuilder: (context, index) {
-                    final post = posts[index];
-                    return PostCard(
-                      post: post,
-                      username: widget.userName,
-                    );
-                  },
+      body:
+          isLoading
+              ? const Center(child: CircularProgressIndicator())
+              : posts.isEmpty
+              ? Center(child: Text('No Posts provided.'))
+              : GridView.builder(
+                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 3,
+                  mainAxisSpacing: 1,
+                  crossAxisSpacing: 1,
                 ),
+                itemCount: posts.length,
+                itemBuilder: (context, index) {
+                  final post = posts[index];
+                  return PostCard(post: post, username: widget.userName);
+                },
+              ),
     );
   }
 }
@@ -79,56 +81,43 @@ class PostCard extends StatefulWidget {
 }
 
 class _PostCardState extends State<PostCard> {
-  final SupabaseClient supabase = Supabase.instance.client;
-
+  final SupabaseClient supabase = Supabase.instance.client; // open the database
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 3.0),
+      padding: const EdgeInsets.symmetric(vertical: 3.0, horizontal: 3),
       child: Container(
         decoration: customContainerDecoration(context),
-        child: ListTile(
+        child: GestureDetector(
           onTap: () {
             Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (context) => Post_DetailPage(
-                  postName: widget.post['Name'],
-                ),
+                builder:
+                    (context) => Post_DetailPage(postName: widget.post['Name']),
               ),
             );
           },
-          contentPadding:
-              const EdgeInsets.symmetric(horizontal: 20, vertical: 3),
-          title: Row(
-            children: [
-              Image.network(
-                supabase.storage.from('images').getPublicUrl(
-                    'images/posts/${widget.username}/${widget.post['Name']}'),
-                width: 50, // Increased size for visibility
-                height: 50,
-                loadingBuilder: (context, child, loadingProgress) {
-                  if (loadingProgress == null) return child;
-                  return CircularProgressIndicator(); // Loading spinner
-                },
-                errorBuilder: (context, error, stackTrace) {
-                  return Icon(
-                    Icons.image_not_supported,
-                    size: 50,
-                    color: Colors.grey,
-                  ); // Fallback if image fails to load
-                },
-              ),
-              SizedBox(
-                width: 10,
-              ),
-              Text(
-                widget.post['Name'] ?? 'Unknown Course',
-                style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    color: Color.fromARGB(255, 54, 43, 75)),
-              ),
-            ],
+          child: Image.network(
+            supabase.storage
+                .from('images')
+                .getPublicUrl(
+                  'images/posts/${widget.username}/${widget.post['Name']}',
+                ),
+            width: 100,
+            height: 100,
+            fit: BoxFit.cover,
+            loadingBuilder: (context, child, loadingProgress) {
+              if (loadingProgress == null) return child;
+              return CircularProgressIndicator(); // Loading spinner
+            },
+            errorBuilder: (context, error, stackTrace) {
+              return Icon(
+                Icons.image_not_supported,
+                size: 50,
+                color: Colors.grey,
+              ); // Fallback if image fails to load
+            },
           ),
         ),
       ),

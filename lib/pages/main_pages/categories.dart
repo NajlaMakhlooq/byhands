@@ -1,8 +1,8 @@
-import 'package:byhands_application/menus/mainmenu.dart';
-import 'package:byhands_application/pop_up/category_details.dart';
-import 'package:byhands_application/theme.dart';
+import 'package:byhands/pages/menus/mainmenu.dart';
+import 'package:byhands/pages/pop_up/category_details.dart';
+import 'package:byhands/theme.dart';
 import 'package:flutter/material.dart';
-import 'package:byhands_application/menus/side_menu.dart';
+import 'package:byhands/pages/menus/side_menu.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class Categories extends StatefulWidget {
@@ -28,13 +28,16 @@ class _CategoriesState extends State<Categories> {
     try {
       final response = await supabase.from('categories').select();
       setState(() {
-        allCategories = (response as List<dynamic>?)
-                ?.map((e) => {
-                      'Name': e['Name'] ?? 'Unknown', // Handle null values
-                      'Description':
-                          e['Description'] ?? 'No description available',
-                      'icon': e['icon'],
-                    })
+        allCategories =
+            (response as List<dynamic>?)
+                ?.map(
+                  (e) => {
+                    'Name': e['Name'] ?? 'Unknown', // Handle null values
+                    'Description':
+                        e['Description'] ?? 'No description available',
+                    'icon': e['icon'],
+                  },
+                )
                 .toList() ??
             [];
 
@@ -78,16 +81,23 @@ class _CategoriesState extends State<Categories> {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  _buildTextField(nameController, "Category Name",
-                      "Please enter category name"),
-                  SizedBox(height: 15),
-                  _buildTextField(descrbtionController, "Category Description",
-                      "Please enter category description"),
+                  _buildTextField(
+                    nameController,
+                    "Category Name",
+                    "Please enter category name",
+                  ),
                   SizedBox(height: 15),
                   _buildTextField(
-                      explainController,
-                      "Category request explanation",
-                      "Please enter category request explanation"),
+                    descrbtionController,
+                    "Category Description",
+                    "Please enter category description",
+                  ),
+                  SizedBox(height: 15),
+                  _buildTextField(
+                    explainController,
+                    "Category request explanation",
+                    "Please enter category request explanation",
+                  ),
                   SizedBox(height: 15),
                 ],
               ),
@@ -104,8 +114,9 @@ class _CategoriesState extends State<Categories> {
               child: Text("Submit"),
               onPressed: () async {
                 // Check if name requested before
-                bool categorynamerequested =
-                    await checkCategorynameExists(nameController.text);
+                bool categorynamerequested = await checkCategorynameExists(
+                  nameController.text,
+                );
                 if (categorynamerequested) {
                   Navigator.of(context).pop();
                   // Show error message
@@ -121,7 +132,6 @@ class _CategoriesState extends State<Categories> {
 
                 // Insert Data
                 if (formfield.currentState!.validate()) {
-                  print("Success");
                   insertRequest();
                   Navigator.pop(context);
                 }
@@ -133,15 +143,19 @@ class _CategoriesState extends State<Categories> {
     );
   }
 
-  Widget _buildTextField(TextEditingController controller, String labelText,
-      String validatorText) {
+  Widget _buildTextField(
+    TextEditingController controller,
+    String labelText,
+    String validatorText,
+  ) {
     return SizedBox(
       width: double.infinity,
       child: TextFormField(
         controller: controller,
-        decoration: textInputdecoration(context, labelText).copyWith(
-          prefixIcon: Icon(Icons.abc),
-        ),
+        decoration: textInputdecoration(
+          context,
+          labelText,
+        ).copyWith(prefixIcon: Icon(Icons.abc)),
         validator: (value) {
           if (value == null || value.isEmpty) {
             return validatorText;
@@ -155,12 +169,15 @@ class _CategoriesState extends State<Categories> {
   void updateSearchQuery(String query) {
     setState(() {
       searchQuery = query;
-      displayedCategories = allCategories
-          .where((category) => category['Name']
-              .toString()
-              .toLowerCase()
-              .contains(searchQuery.toLowerCase()))
-          .toList();
+      displayedCategories =
+          allCategories
+              .where(
+                (category) => category['Name']
+                    .toString()
+                    .toLowerCase()
+                    .contains(searchQuery.toLowerCase()),
+              )
+              .toList();
     });
   }
 
@@ -173,7 +190,23 @@ class _CategoriesState extends State<Categories> {
         leading: Builder(
           builder: (BuildContext context) {
             return IconButton(
-              icon: const Icon(Icons.menu),
+              icon: Icon(
+                Icons.menu,
+                color:
+                    Theme.of(context).brightness == Brightness.dark
+                        ? const Color.fromARGB(
+                          255,
+                          135,
+                          128,
+                          139,
+                        ) // Dark mode color
+                        : const Color.fromARGB(
+                          255,
+                          203,
+                          194,
+                          205,
+                        ), // Light mode color
+              ),
               onPressed: () {
                 Scaffold.of(context).openDrawer();
               },
@@ -198,71 +231,80 @@ class _CategoriesState extends State<Categories> {
               ),
             ),
           ),
-          SizedBox(
-            height: 15,
-          ),
+          SizedBox(height: 15),
           Expanded(
-            child: displayedCategories.isEmpty
-                ? Center(child: CircularProgressIndicator())
-                : ListView.builder(
-                    itemCount: displayedCategories.length,
-                    itemBuilder: (context, index) {
-                      final category = displayedCategories[index];
+            child:
+                displayedCategories.isEmpty
+                    ? Center(child: CircularProgressIndicator())
+                    : ListView.builder(
+                      itemCount: displayedCategories.length,
+                      itemBuilder: (context, index) {
+                        final category = displayedCategories[index];
 
-                      return Padding(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 10, vertical: 5),
-                        child: Container(
-                          decoration: customContainerDecoration(context),
-                          child: ListTile(
-                            onTap: () {
-                              String CategoryName = category['Name'];
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => CategoryDetailPage(
-                                    categoryName: CategoryName,
+                        return Padding(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 10,
+                            vertical: 5,
+                          ),
+                          child: Container(
+                            decoration: customContainerDecoration(context),
+                            child: ListTile(
+                              onTap: () {
+                                String CategoryName = category['Name'];
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder:
+                                        (context) => CategoryDetailPage(
+                                          categoryName: CategoryName,
+                                        ),
                                   ),
-                                ),
-                              );
-                            },
-                            contentPadding: EdgeInsets.symmetric(
-                                horizontal: 20, vertical: 10),
-                            title: Row(
-                              children: [
-                                Image.network(
-                                  supabase.storage.from('images').getPublicUrl(
-                                      'categories/${category['icon']}'),
-                                  width: 50, // Increased size for visibility
-                                  height: 50,
-                                  loadingBuilder:
-                                      (context, child, loadingProgress) {
-                                    if (loadingProgress == null) return child;
-                                    return CircularProgressIndicator(); // Loading spinner
-                                  },
-                                  errorBuilder: (context, error, stackTrace) {
-                                    return Icon(
-                                      Icons.image_not_supported,
-                                      size: 50,
-                                    ); // Fallback if image fails to load
-                                  },
-                                ),
-                                SizedBox(
-                                  width: 10,
-                                ),
-                                Text(
-                                  category['Name'] ?? 'Unknown Category',
-                                  style: TextStyle(
+                                );
+                              },
+                              contentPadding: EdgeInsets.symmetric(
+                                horizontal: 20,
+                                vertical: 10,
+                              ),
+                              title: Row(
+                                children: [
+                                  Image.network(
+                                    supabase.storage
+                                        .from('images')
+                                        .getPublicUrl(
+                                          'categories/${category['icon']}',
+                                        ),
+                                    width: 50, // Increased size for visibility
+                                    height: 50,
+                                    loadingBuilder: (
+                                      context,
+                                      child,
+                                      loadingProgress,
+                                    ) {
+                                      if (loadingProgress == null) return child;
+                                      return CircularProgressIndicator(); // Loading spinner
+                                    },
+                                    errorBuilder: (context, error, stackTrace) {
+                                      return Icon(
+                                        Icons.image_not_supported,
+                                        size: 50,
+                                      ); // Fallback if image fails to load
+                                    },
+                                  ),
+                                  SizedBox(width: 10),
+                                  Text(
+                                    category['Name'] ?? 'Unknown Category',
+                                    style: TextStyle(
                                       fontWeight: FontWeight.bold,
-                                      color: Color.fromARGB(255, 54, 43, 75)),
-                                ),
-                              ],
+                                      color: Color.fromARGB(255, 54, 43, 75),
+                                    ),
+                                  ),
+                                ],
+                              ),
                             ),
                           ),
-                        ),
-                      );
-                    },
-                  ),
+                        );
+                      },
+                    ),
           ),
           TextButton(
             onPressed: () {
@@ -281,11 +323,12 @@ class _CategoriesState extends State<Categories> {
 }
 
 Future<bool> checkCategorynameExists(String name) async {
-  final response = await Supabase.instance.client
-      .from('categories')
-      .select()
-      .eq('Name', name)
-      .maybeSingle();
+  final response =
+      await Supabase.instance.client
+          .from('categories')
+          .select()
+          .eq('Name', name)
+          .maybeSingle();
 
   if (response != null) {
     return true; // Username exists
