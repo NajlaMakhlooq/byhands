@@ -210,7 +210,7 @@ class _HelpState extends State<Help> {
 
     Future<void> insertFAQ() async {
       try {
-        await Supabase.instance.client.from('FAQ').insert({
+        await Supabase.instance.client.from('FAQs_Req').insert({
           'Question': QuestionController.text,
         });
       } catch (e) {

@@ -7,27 +7,27 @@ ThemeData lightTheme = ThemeData(
   textTheme: TextTheme(
     bodyLarge: TextStyle(
       fontWeight: FontWeight.w900,
-      color: const Color.fromARGB(255, 54, 43, 75),
+      color: const Color.fromARGB(255, 37, 30, 52),
       fontSize: 18,
     ),
     bodyMedium: TextStyle(
       fontWeight: FontWeight.w600,
-      color: const Color.fromARGB(255, 54, 43, 75),
+      color: const Color.fromARGB(255, 37, 30, 52),
       fontSize: 15,
     ),
     bodySmall: TextStyle(
       fontWeight: FontWeight.w400,
-      color: const Color.fromARGB(255, 54, 43, 75),
+      color: const Color.fromARGB(255, 37, 30, 52),
       fontSize: 12,
     ),
     titleMedium: TextStyle(
       fontWeight: FontWeight.w900,
-      color: const Color.fromARGB(255, 54, 43, 75),
+      color: const Color.fromARGB(255, 37, 30, 52),
       fontSize: 20,
     ),
     titleLarge: TextStyle(
       fontWeight: FontWeight.w900,
-      color: const Color.fromARGB(255, 54, 43, 75),
+      color: const Color.fromARGB(255, 37, 30, 52),
       fontSize: 24,
     ),
   ),
@@ -120,7 +120,7 @@ InputDecoration textInputdecoration(BuildContext context, String text) {
   );
 }
 
-BoxDecoration ChatsContainerDecoration(BuildContext context) {
+BoxDecoration UsersListContainerDecoration(BuildContext context) {
   return BoxDecoration(
     color:
         Theme.of(context).brightness == Brightness.dark

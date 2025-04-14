@@ -1,8 +1,8 @@
 import 'package:byhands/pages/menus/mainmenu.dart';
 import 'package:byhands/pages/menus/side_menu.dart';
-import 'package:byhands/pages/pop_up/Course_details.dart';
-import 'package:byhands/pages/pop_up/category_details.dart';
-import 'package:byhands/pages/userInfo_pages/other_user_profilepages/UsersProfile.dart';
+import 'package:byhands/pages/courses/Course_details.dart';
+import 'package:byhands/pages/categories/category_details.dart';
+import 'package:byhands/pages/profile_pages/UsersProfile.dart';
 import 'package:byhands/theme.dart';
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -224,192 +224,199 @@ class _DashboardPage extends State<DashboardPage> {
                   },
                 ),
               )
-              : Column(
-                children: [
-                  SizedBox(height: 10),
-                  Align(
-                    alignment:
-                        Alignment.centerLeft, // Aligns the text to the left
-                    child: Padding(
-                      padding: const EdgeInsets.fromLTRB(20, 0, 0, 0),
-                      child: Text(
-                        'Users followed',
-                        style: Theme.of(context).textTheme.titleLarge,
-                      ),
-                    ),
-                  ),
-                  SizedBox(height: 10),
-                  SizedBox(
-                    height: 130,
-                    child:
-                        Users.isEmpty
-                            ? Center(
-                              child: Text(
-                                'No Users found.',
-                                style: Theme.of(context).textTheme.bodySmall,
-                              ),
-                            )
-                            : Padding(
-                              padding: const EdgeInsets.all(8.0),
-                              child: ListView.builder(
-                                scrollDirection: Axis.horizontal,
-                                itemCount: Users.length,
-                                itemBuilder: (context, index) {
-                                  final user = Users[index];
-                                  String imageUrl = supabase.storage
-                                      .from('images')
-                                      .getPublicUrl(
-                                        'images/profiles/${user['following_to']}/${user['following_to']}profile',
-                                      );
-                                  return Padding(
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 10,
-                                    ), // Reduced vertical padding
-                                    child: Center(
-                                      child: UserCard(
-                                        label:
-                                            user['following_to'] ??
-                                            'Unknown User',
-                                        onTap: () {
-                                          String Username =
-                                              user['following_to'];
-                                          Navigator.push(
-                                            context,
-                                            MaterialPageRoute(
-                                              builder:
-                                                  (context) => UsersProfile(
-                                                    username: Username,
-                                                  ),
-                                            ),
-                                          );
-                                        },
-                                        imageUrl:
-                                            imageUrl.isNotEmpty
-                                                ? imageUrl
-                                                : 'assets/logo.png', // Fallback image
-                                      ),
-                                    ),
-                                  );
-                                },
-                              ),
-                            ),
-                  ),
-                  Row(
-                    children: [
-                      Align(
-                        alignment:
-                            Alignment.centerLeft, // Aligns the text to the left
-                        child: Padding(
-                          padding: const EdgeInsets.fromLTRB(20, 0, 0, 0),
-                          child: Text(
-                            'Categories',
-                            style: Theme.of(context).textTheme.titleLarge,
-                          ),
+              : SingleChildScrollView(
+                child: Column(
+                  children: [
+                    SizedBox(height: 10),
+                    Align(
+                      alignment:
+                          Alignment.centerLeft, // Aligns the text to the left
+                      child: Padding(
+                        padding: const EdgeInsets.fromLTRB(20, 0, 0, 0),
+                        child: Text(
+                          'Users followed',
+                          style: Theme.of(context).textTheme.titleLarge,
                         ),
                       ),
-                      Align(
-                        alignment:
-                            Alignment
-                                .centerRight, // Aligns the text to the left
-                        child: Padding(
-                          padding: const EdgeInsets.fromLTRB(20, 0, 0, 0),
-                          child: TextButton(
-                            onPressed: () {
-                              Navigator.pushNamed(context, '/Categories');
-                            },
+                    ),
+                    SizedBox(height: 10),
+                    SizedBox(
+                      height: 130,
+                      child:
+                          Users.isEmpty
+                              ? Center(
+                                child: Text(
+                                  'No Users found.',
+                                  style: Theme.of(context).textTheme.bodySmall,
+                                ),
+                              )
+                              : Padding(
+                                padding: const EdgeInsets.all(8.0),
+                                child: ListView.builder(
+                                  scrollDirection: Axis.horizontal,
+                                  itemCount: Users.length,
+                                  itemBuilder: (context, index) {
+                                    final user = Users[index];
+                                    String response = supabase.storage
+                                        .from('images')
+                                        .getPublicUrl(
+                                          'images/profiles/${user['following_to']}/${user['following_to']}profile',
+                                        );
+                                    String imageUrl =
+                                        '$response?t=${DateTime.now().millisecondsSinceEpoch}';
+                                    return Padding(
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 10,
+                                      ), // Reduced vertical padding
+                                      child: Center(
+                                        child: UserCard(
+                                          label:
+                                              user['following_to'] ??
+                                              'Unknown User',
+                                          onTap: () {
+                                            String Username =
+                                                user['following_to'];
+                                            Navigator.push(
+                                              context,
+                                              MaterialPageRoute(
+                                                builder:
+                                                    (context) => UsersProfile(
+                                                      username: Username,
+                                                    ),
+                                              ),
+                                            );
+                                          },
+                                          imageUrl:
+                                              imageUrl.isNotEmpty
+                                                  ? imageUrl
+                                                  : 'assets/logo.png', // Fallback image
+                                        ),
+                                      ),
+                                    );
+                                  },
+                                ),
+                              ),
+                    ),
+                    Row(
+                      children: [
+                        Align(
+                          alignment:
+                              Alignment
+                                  .centerLeft, // Aligns the text to the left
+                          child: Padding(
+                            padding: const EdgeInsets.fromLTRB(20, 0, 0, 0),
                             child: Text(
-                              'see all',
-                              style: Theme.of(context).textTheme.bodyMedium,
+                              'Categories',
+                              style: Theme.of(context).textTheme.titleLarge,
                             ),
                           ),
                         ),
-                      ),
-                    ],
-                  ),
-                  SizedBox(height: 10),
-                  SizedBox(
-                    height: 140,
-                    child:
-                        allCategories.isEmpty
-                            ? Center(
+                        Align(
+                          alignment:
+                              Alignment
+                                  .centerRight, // Aligns the text to the left
+                          child: Padding(
+                            padding: const EdgeInsets.fromLTRB(20, 0, 0, 0),
+                            child: TextButton(
+                              onPressed: () {
+                                Navigator.pushNamed(context, '/Categories');
+                              },
                               child: Text(
-                                'No categories found.',
-                                style: Theme.of(context).textTheme.bodySmall,
-                              ),
-                            )
-                            : Padding(
-                              padding: const EdgeInsets.all(8.0),
-                              child: ListView.builder(
-                                scrollDirection: Axis.horizontal,
-                                itemCount: allCategories.length,
-                                itemBuilder: (context, index) {
-                                  final category = allCategories[index];
-                                  String imageUrl = supabase.storage
-                                      .from('images')
-                                      .getPublicUrl(
-                                        'categories/${category['icon']}',
-                                      );
-                                  return Padding(
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 8,
-                                    ), // Reduced vertical padding
-                                    child: Center(
-                                      child: CategoryCard(
-                                        label:
-                                            category['Name'] ??
-                                            'Unknown Category',
-                                        onTap: () {
-                                          String categoryName =
-                                              category['Name'];
-                                          Navigator.push(
-                                            context,
-                                            MaterialPageRoute(
-                                              builder:
-                                                  (context) =>
-                                                      CategoryDetailPage(
-                                                        categoryName:
-                                                            categoryName,
-                                                      ),
-                                            ),
-                                          );
-                                        },
-                                        imageUrl:
-                                            imageUrl.isNotEmpty
-                                                ? imageUrl
-                                                : 'assets/logo.png', // Fallback image
-                                      ),
-                                    ),
-                                  );
-                                },
+                                'see all',
+                                style: Theme.of(context).textTheme.bodyMedium,
                               ),
                             ),
-                  ),
-                  SizedBox(height: 20),
-                  // Popular Section
-                  Align(
-                    alignment:
-                        Alignment.centerLeft, // Aligns the text to the left
-                    child: Padding(
-                      padding: const EdgeInsets.fromLTRB(20, 0, 0, 0),
-                      child: Text(
-                        'Popular Courses',
-                        style: Theme.of(context).textTheme.titleLarge,
+                          ),
+                        ),
+                      ],
+                    ),
+                    SizedBox(height: 10),
+                    SizedBox(
+                      height: 140,
+                      child:
+                          allCategories.isEmpty
+                              ? Center(
+                                child: Text(
+                                  'No categories found.',
+                                  style: Theme.of(context).textTheme.bodySmall,
+                                ),
+                              )
+                              : Padding(
+                                padding: const EdgeInsets.all(8.0),
+                                child: ListView.builder(
+                                  scrollDirection: Axis.horizontal,
+                                  itemCount: allCategories.length,
+                                  itemBuilder: (context, index) {
+                                    final category = allCategories[index];
+                                    String response = supabase.storage
+                                        .from('images')
+                                        .getPublicUrl(
+                                          'categories/${category['icon']}',
+                                        );
+                                    String imageUrl =
+                                        '$response?t=${DateTime.now().millisecondsSinceEpoch}';
+                                    return Padding(
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 8,
+                                      ), // Reduced vertical padding
+                                      child: Center(
+                                        child: CategoryCard(
+                                          label:
+                                              category['Name'] ??
+                                              'Unknown Category',
+                                          onTap: () {
+                                            String categoryName =
+                                                category['Name'];
+                                            Navigator.push(
+                                              context,
+                                              MaterialPageRoute(
+                                                builder:
+                                                    (context) =>
+                                                        CategoryDetailPage(
+                                                          categoryName:
+                                                              categoryName,
+                                                        ),
+                                              ),
+                                            );
+                                          },
+                                          imageUrl:
+                                              imageUrl.isNotEmpty
+                                                  ? imageUrl
+                                                  : 'assets/logo.png', // Fallback image
+                                        ),
+                                      ),
+                                    );
+                                  },
+                                ),
+                              ),
+                    ),
+                    SizedBox(height: 20),
+                    // Popular Section
+                    Align(
+                      alignment:
+                          Alignment.centerLeft, // Aligns the text to the left
+                      child: Padding(
+                        padding: const EdgeInsets.fromLTRB(20, 0, 0, 0),
+                        child: Text(
+                          'Popular Courses',
+                          style: Theme.of(context).textTheme.titleLarge,
+                        ),
                       ),
                     ),
-                  ),
-                  SizedBox(height: 10),
-                  SizedBox(
-                    height: 250,
-                    child: ScrollSnapList(
-                      itemBuilder: _buildItemList,
-                      itemSize: 200,
-                      dynamicItemSize: true,
-                      itemCount: Courses.length,
-                      onItemFocus: (integer) {},
+                    SizedBox(height: 10),
+                    SizedBox(
+                      height: 250,
+                      child: ScrollSnapList(
+                        itemBuilder: _buildItemList,
+                        itemSize: 200,
+                        dynamicItemSize: true,
+                        itemCount: Courses.length,
+                        onItemFocus: (integer) {},
+                      ),
                     ),
-                  ),
-                  SizedBox(height: 15),
-                ],
+                    SizedBox(height: 15),
+                  ],
+                ),
               ),
       bottomNavigationBar: mainMenu(0),
     );
@@ -417,9 +424,12 @@ class _DashboardPage extends State<DashboardPage> {
 
   Widget _buildItemList(BuildContext context, int index) {
     final course = Courses[index];
-    String courseImageURL = supabase.storage
+    String response = supabase.storage
         .from('images')
         .getPublicUrl('courses/${course['Name']}');
+
+    String courseImageURL =
+        '$response?t=${DateTime.now().millisecondsSinceEpoch}';
 
     if (index == course.length) {
       return Center(child: CircularProgressIndicator());
@@ -567,7 +577,7 @@ class UserCard extends StatelessWidget {
                     216,
                     222,
                     236,
-                  ), // You can set your desired border color here
+                  ), // desired border color
                   width: 2, // Set the width of the border
                 ),
               ),

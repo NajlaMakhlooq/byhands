@@ -1,5 +1,6 @@
-import 'package:byhands/pages/main_pages/services/auth_service.dart';
-import 'package:byhands/pages/userInfo_pages/savedposts.dart';
+import 'package:byhands/services/auth/auth_service.dart';
+import 'package:byhands/pages/profile_pages/savedposts.dart';
+import 'package:byhands/pages/setting_pages/s_and_p.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -14,6 +15,14 @@ class CommonDrawer extends StatefulWidget {
 class _CommonDrawerState extends State<CommonDrawer> {
   final SupabaseClient supabase = Supabase.instance.client; // open the database
   final authService = AuthService();
+
+  ThemeMode _themeMode = ThemeMode.light;
+  void toggleThemeModeSwitch() {
+    setState(() {
+      _themeMode =
+          _themeMode == ThemeMode.light ? ThemeMode.dark : ThemeMode.light;
+    });
+  }
 
   String username = "";
   String url_profile = "";
@@ -68,7 +77,7 @@ class _CommonDrawerState extends State<CommonDrawer> {
         .getPublicUrl('images/profiles/$username/${username}profile');
 
     setState(() {
-      url_profile = response;
+      url_profile = '$response?t=${DateTime.now().millisecondsSinceEpoch}';
     });
   }
 
@@ -129,12 +138,7 @@ class _CommonDrawerState extends State<CommonDrawer> {
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 border: Border.all(
-                  color: Color.fromARGB(
-                    255,
-                    216,
-                    222,
-                    236,
-                  ), // You can set your desired border color here
+                  color: Color.fromARGB(255, 216, 222, 236), // border color
                   width: 2, // Set the width of the border
                 ),
               ),
@@ -223,7 +227,16 @@ class _CommonDrawerState extends State<CommonDrawer> {
             style: Theme.of(context).textTheme.bodyMedium,
           ),
           onTap: () {
-            Navigator.popAndPushNamed(context, '/SandP');
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder:
+                    (context) => SettingsPage(
+                      toggleThemeMode: toggleThemeModeSwitch,
+                      username: username,
+                    ),
+              ),
+            );
           },
         ),
         ListTile(

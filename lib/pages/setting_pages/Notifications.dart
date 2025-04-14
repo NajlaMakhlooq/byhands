@@ -1,4 +1,3 @@
-import 'package:byhands/pages/pop_up/Notification_details.dart';
 import 'package:byhands/theme.dart';
 import 'package:flutter/material.dart';
 import 'package:byhands/pages/menus/side_menu.dart';
@@ -177,20 +176,7 @@ class _Notifications extends State<Notifications> {
                                       context,
                                     ),
                                     child: ListTile(
-                                      onTap: () {
-                                        String title =
-                                            titleNotification['title'];
-                                        Navigator.push(
-                                          context,
-                                          MaterialPageRoute(
-                                            builder:
-                                                (context) =>
-                                                    NotificationDetailPage(
-                                                      title: title,
-                                                    ),
-                                          ),
-                                        );
-                                      },
+                                      onTap: () {},
                                       contentPadding: EdgeInsets.symmetric(
                                         horizontal: 20,
                                         vertical: 10,
@@ -217,6 +203,13 @@ class _Notifications extends State<Notifications> {
                                                 ).textTheme.bodyLarge,
                                           ),
                                         ],
+                                      ),
+                                      subtitle: Text(
+                                        titleNotification['desc'].toString(),
+                                        style:
+                                            Theme.of(
+                                              context,
+                                            ).textTheme.bodyMedium,
                                       ),
                                     ),
                                   ),
