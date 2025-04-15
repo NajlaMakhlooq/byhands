@@ -31,6 +31,7 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   runApp(BY_HANDSApp());
+  print("🚀 Starting up...");
 }
 
 class BY_HANDSApp extends StatefulWidget {

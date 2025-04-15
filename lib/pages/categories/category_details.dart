@@ -45,7 +45,7 @@ class _CategoryDetailPageState extends State<CategoryDetailPage> {
               )
               .toList();
     } catch (error) {
-      print('Error fetching Posts: $error');
+      print('❌ Error fetching Posts: $error');
     }
   }
 

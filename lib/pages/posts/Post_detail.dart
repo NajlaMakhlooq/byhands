@@ -85,9 +85,8 @@ class _Post_DetailPageState extends State<Post_DetailPage> {
                   .toList() ??
               [];
         });
-        print("comments : $comments");
       } catch (error) {
-        print('Error fetching Comments: $error');
+        print('❌ Error fetching Comments: $error');
       }
       Future<void> checkLiked() async {
         final checkLiked =
@@ -102,7 +101,7 @@ class _Post_DetailPageState extends State<Post_DetailPage> {
           setState(() {
             liked = true;
           });
-          print("liked? $liked");
+          print("⏳ liked? $liked");
         }
       }
 
@@ -135,7 +134,7 @@ class _Post_DetailPageState extends State<Post_DetailPage> {
             [];
       });
     } catch (error) {
-      print('Error fetching Post: $error');
+      print('❌ Error fetching Post: $error');
     }
   }
 
@@ -195,7 +194,7 @@ class _Post_DetailPageState extends State<Post_DetailPage> {
                                       : "",
                                 ),
                                 onBackgroundImageError: (error, stackTrace) {
-                                  print('Error loading image: $error');
+                                  print('📛 Error loading image: $error');
                                 },
                               ),
                             ),
@@ -392,7 +391,7 @@ class _Post_DetailPageState extends State<Post_DetailPage> {
                                                   stackTrace,
                                                 ) {
                                                   print(
-                                                    'Error loading image: $error',
+                                                    '📛 Error loading image: $error',
                                                   );
                                                 },
                                               ),
@@ -452,12 +451,9 @@ class _Post_DetailPageState extends State<Post_DetailPage> {
           'post_id': postID,
           'username': username,
         });
-
         setState(() {
           liked = true;
         });
-
-        print("Data inserted successfully");
         final formfield = GlobalKey<FormState>();
         showDialog(
           context: context,
@@ -483,7 +479,7 @@ class _Post_DetailPageState extends State<Post_DetailPage> {
         );
       }
     } catch (e) {
-      print("Error : $e");
+      print("❌ Error : $e");
     }
   }
 }

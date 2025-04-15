@@ -64,7 +64,7 @@ class _likedcourses extends State<likedcourses> {
         });
       }
     } catch (error) {
-      print("Error fetching UserID: $error");
+      print("❌ Error fetching UserID: $error");
     } finally {
       setState(() {
         isLoading = false; // Stop loading regardless of success or failure
@@ -99,7 +99,7 @@ class _likedcourses extends State<likedcourses> {
         likedCourses = fetchedCourses; // Update the likedCourses state
       });
     } catch (error) {
-      print('Error fetching courses: $error');
+      print('❌ Error fetching courses: $error');
     }
   }
 
@@ -261,7 +261,6 @@ class _likedcourses extends State<likedcourses> {
                                                           'course_id',
                                                           course['id'],
                                                         );
-                                                    print("deleted");
                                                     Navigator.of(context).pop();
 
                                                     Navigator.of(

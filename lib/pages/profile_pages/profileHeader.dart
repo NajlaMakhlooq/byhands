@@ -50,7 +50,7 @@ class _profileHeader extends State<profileHeader> {
             .maybeSingle();
 
     if (response == null) {
-      print("User data not found.");
+      print("⚠️ User data not found.");
       return;
     }
 
@@ -60,7 +60,6 @@ class _profileHeader extends State<profileHeader> {
       Bio = response['Bio'].toString();
     });
 
-    print("UserID: $userId");
     // Query the Friendship table for follower count
     final responsefollower = await supabase
         .from('Friendship')
@@ -80,7 +79,6 @@ class _profileHeader extends State<profileHeader> {
               .toList() ??
           [];
     });
-    print("follower : ${followerList.length}");
 
     // Query the Friendship table for following count
     final responsefollowing = await supabase
@@ -101,7 +99,6 @@ class _profileHeader extends State<profileHeader> {
               .toList() ??
           [];
     });
-    print("following : ${followingList.length}");
 
     // Query the Post table for the number of posts
     final responsePosts = await supabase
@@ -119,7 +116,6 @@ class _profileHeader extends State<profileHeader> {
               .toList() ??
           [];
     });
-    print("follower : ${postList.length}");
   }
 
   @override
@@ -139,7 +135,7 @@ class _profileHeader extends State<profileHeader> {
                   backgroundImage: NetworkImage(url_profile),
                   onBackgroundImageError: (error, stackTrace) {
                     // Handle errors gracefully
-                    print('loading image Error: $error');
+                    print('📛 loading image Error: $error');
                   },
                 ),
                 InkWell(

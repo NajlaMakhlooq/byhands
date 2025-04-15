@@ -26,7 +26,6 @@ class _FollowinglistDisplayState extends State<FollowinglistDisplay> {
     setState(() {
       displayedFollowing = widget.followingList;
     });
-    print("List = ${widget.followingList}");
   }
 
   void updateSearchQuery(String query) {
@@ -125,7 +124,7 @@ class _FollowinglistDisplayState extends State<FollowinglistDisplay> {
                                       stackTrace,
                                     ) {
                                       // Handle errors gracefully
-                                      print('loading image Error: $error');
+                                      print('📛 loading image Error: $error');
                                     },
                                   ),
                                   SizedBox(width: 10),

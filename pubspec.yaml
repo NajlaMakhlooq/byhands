@@ -30,25 +30,28 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  firebase_auth: ^5.5.2
-  firebase_core: ^3.13.0
   camera: ^0.11.0+2 # to use the camera
   gal: ^2.3.1 # to save images to gallery
   curved_navigation_bar: ^1.0.6 # for navigators design
   flutter_bloc: ^9.1.0 # for loading 
   equatable: ^2.0.3
   google_nav_bar: ^5.0.6 # for navigator design
-  image_picker: ^0.8.4+2 # to pick an image from the gallery
+  image_picker: ^1.1.2 # to pick an image from the gallery
   supabase_flutter: ^2.8.4 # to gonnect the database to the project
-  intl: ^0.19.0 # For formatting dates, numbers, etc.
+  intl: ^0.20.2 # For formatting dates, numbers, etc.
   provider: ^6.0.3
   flutter_rating_bar: ^4.0.0 # for the feedback rating
   image: ^4.0.17 # to crop the captured image
   scroll_snap_list: ^0.9.1 #dashboard list
   flutter_dotenv: ^5.0.2
-  firebase_storage: ^12.4.5
-  cloud_firestore: ^5.6.6
   cached_network_image: ^3.3.0
+  firebase_core: ^3.8.0
+  cloud_firestore: ^5.6.6
+  firebase_auth: ^5.2.0
+  firebase_storage: ^12.4.5
+  path_provider: ^2.0.15 // to get Temporary Directory
+
+  
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
@@ -57,6 +60,7 @@ dependencies:
 dev_dependencies:
   flutter_test:
     sdk: flutter
+  flutter_launcher_icons: ^0.14.3
 
   # The "flutter_lints" package below contains a set of recommended lints to
   # encourage good coding practices. The lint set provided by the package is
@@ -67,6 +71,10 @@ dev_dependencies:
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
+flutter_icons:
+  android: true
+  ios: true
+  image_path: "assets/logo.png"
 
 # The following section is specific to Flutter packages.
 flutter:
@@ -79,6 +87,8 @@ flutter:
   # To add assets to your application, add an assets section, like this:
   assets:
     - assets/logo.png
+    - assets/FemaleProfile.jpg
+    - assets/MaleProfile.jpg
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images

@@ -147,7 +147,7 @@ class _CommonDrawerState extends State<CommonDrawer> {
                 backgroundColor: const Color.fromARGB(255, 216, 222, 236),
                 backgroundImage: NetworkImage(url_profile),
                 onBackgroundImageError: (error, stackTrace) {
-                  print('Error loading image: $error');
+                  print('📛 Error loading image: $error');
                 },
               ),
             ),

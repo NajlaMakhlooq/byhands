@@ -43,7 +43,7 @@ class _CoursesState extends State<Courses> {
         displayedCourses = allCourses;
       });
     } catch (error) {
-      print('Error fetching Courses: $error');
+      print('❌ Error fetching Courses: $error');
     }
   }
 
@@ -190,7 +190,7 @@ class _CoursesState extends State<Courses> {
                                         error,
                                         stackTrace,
                                       ) {
-                                        print('Error loading image: $error');
+                                        print('📛 Error loading image: $error');
                                       },
                                     ),
                                   ),

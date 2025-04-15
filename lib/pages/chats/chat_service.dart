@@ -46,14 +46,16 @@ class ChatService extends ChangeNotifier {
     required String username,
     required String otherUsername,
   }) {
-    final sorted = [username, otherUsername]..sort();
-    final chatId = '${sorted[0]}__${sorted[1]}';
-
-    return _firestore
-        .collection('chat_rooms')
-        .doc(chatId)
-        .collection("messages")
-        .orderBy("timestamp", descending: false)
-        .snapshots();
+    List<String> usernames = [username, otherUsername];
+    usernames.sort();
+    String chatRoomId = usernames.join("_");
+    Stream<QuerySnapshot> messages =
+        _firestore
+            .collection('chat_rooms')
+            .doc(chatRoomId)
+            .collection("messages")
+            .orderBy("Timestamp", descending: true)
+            .snapshots();
+    return messages;
   }
 }

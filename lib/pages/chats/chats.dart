@@ -18,6 +18,7 @@ class _ChatsState extends State<Chats> {
   List<Map<String, dynamic>> messages = [];
   List<Map<String, dynamic>> conversations = [];
   String username = "";
+  List<String> NotChatted = [];
 
   @override
   void initState() {
@@ -47,7 +48,6 @@ class _ChatsState extends State<Chats> {
     setState(() {
       username = response?['Username'] ?? "";
     });
-    print(username);
     fetchConversations();
   }
 
@@ -71,7 +71,6 @@ class _ChatsState extends State<Chats> {
               .toList() ??
           [];
     });
-    print(conversations);
     return conversations;
   }
 
@@ -90,7 +89,10 @@ class _ChatsState extends State<Chats> {
               onPressed: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => Addnewchat()),
+                  MaterialPageRoute(
+                    builder:
+                        (context) => Addnewchat(conversations: conversations),
+                  ),
                 );
               },
               child: Text(
@@ -146,12 +148,54 @@ class _ChatsState extends State<Chats> {
                       child: TextButton(
                         style: buttonsDesign(context),
                         onPressed: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => Addnewchat(),
-                            ),
-                          );
+                          if (conversations.isNotEmpty) {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder:
+                                    (context) => Addnewchat(
+                                      conversations: conversations,
+                                    ),
+                              ),
+                            );
+                          } else {
+                            showDialog(
+                              context: context,
+                              builder: (BuildContext context) {
+                                return AlertDialog(
+                                  title: Text("Follow a new user"),
+                                  content: SingleChildScrollView(
+                                    child: Column(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Text(
+                                          "You are chatting with all your friends follow a new user to chat with or press the button in their profile to chat ",
+                                          style:
+                                              Theme.of(
+                                                context,
+                                              ).textTheme.bodyLarge,
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  actions: [
+                                    TextButton(
+                                      child: Text("Cancel"),
+                                      onPressed: () {
+                                        Navigator.of(context).pop();
+                                      },
+                                    ),
+                                    TextButton(
+                                      child: Text("Submit"),
+                                      onPressed: () async {
+                                        Navigator.pop(context);
+                                      },
+                                    ),
+                                  ],
+                                );
+                              },
+                            );
+                          }
                         },
                         child: Text(
                           'Start new conversation...',
@@ -228,7 +272,7 @@ class _ChatsState extends State<Chats> {
                                         stackTrace,
                                       ) {
                                         // Handle errors gracefully
-                                        print('loading image Error: $error');
+                                        print('📛 loading image Error: $error');
                                       },
                                     ),
                                     SizedBox(width: 10),
@@ -253,7 +297,7 @@ class _ChatsState extends State<Chats> {
                                         stackTrace,
                                       ) {
                                         // Handle errors gracefully
-                                        print('loading image Error: $error');
+                                        print('📛 loading image Error: $error');
                                       },
                                     ),
                                     SizedBox(width: 10),

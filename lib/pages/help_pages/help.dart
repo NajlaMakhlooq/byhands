@@ -60,7 +60,7 @@ class _HelpState extends State<Help> {
             [];
       });
     } catch (error) {
-      print('Error fetching FAQ: $error');
+      print('❌ Error fetching FAQ: $error');
     }
   }
 
@@ -214,7 +214,7 @@ class _HelpState extends State<Help> {
           'Question': QuestionController.text,
         });
       } catch (e) {
-        print("Error inserting data: $e");
+        print("❌🗂️ Error inserting data: $e");
       }
     }
 
@@ -263,52 +263,26 @@ class _HelpState extends State<Help> {
   }
 
   void _contactUs(BuildContext context) {
-    final formfield = GlobalKey<FormState>();
-    final reasonController = TextEditingController();
-    final contentController = TextEditingController();
-
-    Future<void> insertContent() async {
-      try {
-        await Supabase.instance.client.from('ContactUs').insert({
-          'UserID': userID,
-          'reason': reasonController.text,
-          'content': contentController.text,
-        });
-        print("Data inserted successfully");
-      } catch (e) {
-        print("Error inserting data: $e");
-      }
-    }
-
     showDialog(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
           title: Text("Contact Us ?"),
-          content: Form(
-            key: formfield,
-            child: SingleChildScrollView(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    "Phone : ",
-                    style: Theme.of(context).textTheme.bodyLarge,
-                  ),
-                  Text(
-                    "+973 17000000",
-                    style: Theme.of(context).textTheme.bodyMedium,
-                  ),
-                  Text(
-                    "Email : ",
-                    style: Theme.of(context).textTheme.bodyLarge,
-                  ),
-                  Text(
-                    "byhandsapplication@gmail.com",
-                    style: Theme.of(context).textTheme.bodyMedium,
-                  ),
-                ],
-              ),
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text("Phone : ", style: Theme.of(context).textTheme.bodyLarge),
+                Text(
+                  "+973 17000000",
+                  style: Theme.of(context).textTheme.bodyMedium,
+                ),
+                Text("Email : ", style: Theme.of(context).textTheme.bodyLarge),
+                Text(
+                  "byhandsapplication@gmail.com",
+                  style: Theme.of(context).textTheme.bodyMedium,
+                ),
+              ],
             ),
           ),
           actions: [
@@ -319,13 +293,9 @@ class _HelpState extends State<Help> {
               },
             ),
             TextButton(
-              child: Text("Submit"),
+              child: Text("Ok"),
               onPressed: () async {
-                // Insert Data
-                if (formfield.currentState!.validate()) {
-                  insertContent();
-                  Navigator.pop(context);
-                }
+                Navigator.pop(context);
               },
             ),
           ],
@@ -346,9 +316,8 @@ class _HelpState extends State<Help> {
           'feedback_content': FeedbackController.text,
           'rate': Rating,
         });
-        print("Data inserted successfully");
       } catch (e) {
-        print("Error inserting data: $e");
+        print("❌🗂️ Error inserting data: $e");
       }
     }
 

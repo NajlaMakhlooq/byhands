@@ -1,9 +1,11 @@
+import 'package:byhands/pages/chats/chatDetails.dart';
 import 'package:byhands/theme.dart';
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class Addnewchat extends StatefulWidget {
-  const Addnewchat({super.key});
+  Addnewchat({super.key, required this.conversations});
+  List<Map<String, dynamic>> conversations;
 
   @override
   State<Addnewchat> createState() => _AddnewchatState();
@@ -37,7 +39,6 @@ class _AddnewchatState extends State<Addnewchat> {
     setState(() {
       username = response?['Username'] ?? "Unknown User";
     });
-    print("user = $username");
 
     final responsefollowing = await supabase
         .from('Friendship')
@@ -57,10 +58,34 @@ class _AddnewchatState extends State<Addnewchat> {
               .toList() ??
           [];
     });
+    // Step 1: Get a set of all usernames involved in conversations
+    final conversationUsernames =
+        widget.conversations
+            .expand((conv) => [conv['username1'], conv['username2']])
+            .toSet();
+
+    // Step 2: Filter followingList to get only those not in conversationUsernames
+    final notInConversationList =
+        followingList.where((follow) {
+          return !conversationUsernames.contains(follow['following_to']);
+        }).toList();
     setState(() {
-      displayedFollowing = followingList;
+      displayedFollowing = notInConversationList;
     });
-    print("List = $followingList");
+  }
+
+  Future<void> createConversactionRoom(
+    String userame1,
+    String username2,
+  ) async {
+    try {
+      await Supabase.instance.client.from('conversations').insert({
+        'username1': userame1,
+        'username2': username2,
+      });
+    } catch (e) {
+      print("❌🗂️ Error creating room : $e");
+    }
   }
 
   void updateSearchQuery(String query) {
@@ -85,37 +110,33 @@ class _AddnewchatState extends State<Addnewchat> {
         backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
         title: const Text("Start Chatting with"),
       ),
-      body: Column(
-        children: [
-          SizedBox(
-            height: 40,
-            width: 340,
-            child: Padding(
-              padding: const EdgeInsets.all(3.0),
-              child: TextField(
-                onChanged: updateSearchQuery,
-                decoration: InputDecoration(
-                  labelText: 'Search Categories',
-                  border: OutlineInputBorder(),
+      body:
+          displayedFollowing.isEmpty
+              ? Padding(
+                padding: const EdgeInsets.all(40.0),
+                child: Text(
+                  "You are chatting with all your friends follow a new user to chat with or press the button in their profile to chat ",
+                  style: Theme.of(context).textTheme.bodyLarge,
                 ),
-              ),
-            ),
-          ),
-          Expanded(
-            child:
-                displayedFollowing.isEmpty
-                    ? Center(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Text(
-                            'No User found',
-                            style: Theme.of(context).textTheme.titleMedium,
-                          ),
-                        ],
+              )
+              : Column(
+                children: [
+                  SizedBox(
+                    height: 40,
+                    width: 340,
+                    child: Padding(
+                      padding: const EdgeInsets.all(3.0),
+                      child: TextField(
+                        onChanged: updateSearchQuery,
+                        decoration: InputDecoration(
+                          labelText: 'Search Categories',
+                          border: OutlineInputBorder(),
+                        ),
                       ),
-                    )
-                    : ListView.builder(
+                    ),
+                  ),
+                  Expanded(
+                    child: ListView.builder(
                       itemCount: displayedFollowing.length,
                       itemBuilder: (context, index) {
                         final UserInfo = displayedFollowing[index];
@@ -132,7 +153,23 @@ class _AddnewchatState extends State<Addnewchat> {
                           child: Container(
                             decoration: customContainerDecoration(context),
                             child: ListTile(
-                              onTap: () {},
+                              onTap: () async {
+                                await Supabase.instance.client
+                                    .from('conversations')
+                                    .insert({
+                                      'username1': username,
+                                      'username2': UserInfo['following_to'],
+                                    });
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder:
+                                        (context) => ChatDetailScreen(
+                                          username: UserInfo['following_to'],
+                                        ),
+                                  ),
+                                );
+                              },
                               contentPadding: EdgeInsets.symmetric(
                                 horizontal: 20,
                                 vertical: 5,
@@ -155,7 +192,7 @@ class _AddnewchatState extends State<Addnewchat> {
                                       stackTrace,
                                     ) {
                                       // Handle errors gracefully
-                                      print('loading image Error: $error');
+                                      print('📛 loading image Error: $error');
                                     },
                                   ),
                                   SizedBox(width: 10),
@@ -173,9 +210,9 @@ class _AddnewchatState extends State<Addnewchat> {
                         );
                       },
                     ),
-          ),
-        ],
-      ),
+                  ),
+                ],
+              ),
     );
   }
 }

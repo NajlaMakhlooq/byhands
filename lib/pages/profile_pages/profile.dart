@@ -182,16 +182,14 @@ class _ProfileState extends State<Profile> {
                         ],
                       ),
                     ),
-                    username.isEmpty
-                        ? Center(child: CircularProgressIndicator())
-                        : Expanded(
-                          child: TabBarView(
-                            children: [
-                              Posts(userName: username),
-                              Courses(userName: username),
-                            ],
-                          ),
-                        ),
+                    Expanded(
+                      child: TabBarView(
+                        children: [
+                          Posts(userName: username),
+                          Courses(userName: username),
+                        ],
+                      ),
+                    ),
                   ],
                 ),
               ),

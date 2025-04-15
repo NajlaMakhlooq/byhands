@@ -1,7 +1,9 @@
+import 'package:byhands/pages/chats/chat_bubble.dart';
 import 'package:byhands/pages/chats/chat_service.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class ChatDetailScreen extends StatefulWidget {
@@ -73,7 +75,15 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text(widget.username)),
+      appBar: AppBar(
+        title: Text(widget.username),
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back),
+          onPressed: () {
+            Navigator.popAndPushNamed(context, '/Chats');
+          },
+        ),
+      ),
       body: Column(
         children: [
           //messages
@@ -97,9 +107,6 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
         otherUsername: widget.username,
       ),
       builder: (context, snapshot) {
-        print("Snapshot connection state: ${snapshot.connectionState}");
-        print("Snapshot has data: ${snapshot.hasData}");
-        print("Snapshot data length: ${snapshot.data?.docs.length}");
         if (snapshot.hasError) {
           return Text('Error ${snapshot.error}');
         }
@@ -126,6 +133,13 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
   // build message item
   Widget _buildMessageItem(DocumentSnapshot document) {
     Map<String, dynamic> data = document.data() as Map<String, dynamic>;
+    DateTime dateTime = data['Timestamp'].toDate();
+    final formattedTime = DateFormat(
+      'hh:mm a',
+    ).format(dateTime); // e.g. 03:45 PM
+    final formattedDate = DateFormat(
+      'MMM d, yyyy',
+    ).format(dateTime); // e.g. Apr 14, 2025
     // align the messages toright or left
     var alignment =
         (data['senderEmail'] == _firebaseAuth.currentUser!.email)
@@ -133,8 +147,30 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
             : Alignment.bottomLeft;
     return Container(
       alignment: alignment,
-      child: Column(
-        children: [Text(data['senderUsername']), Text(data['message'])],
+      child: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Column(
+          crossAxisAlignment:
+              (data['senderEmail'] == _firebaseAuth.currentUser!.email)
+                  ? CrossAxisAlignment.end
+                  : CrossAxisAlignment.start,
+          mainAxisAlignment:
+              (data['senderEmail'] == _firebaseAuth.currentUser!.email)
+                  ? MainAxisAlignment.end
+                  : MainAxisAlignment.start,
+          children: [
+            Text(
+              data['senderUsername'],
+              style: Theme.of(context).textTheme.labelMedium,
+            ),
+            SizedBox(height: 3),
+            ChatBubble(message: data['message']),
+            Text(
+              '$formattedDate - $formattedTime',
+              style: Theme.of(context).textTheme.labelSmall,
+            ),
+          ],
+        ),
       ),
     );
   }

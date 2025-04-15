@@ -45,7 +45,7 @@ class _CoursesState extends State<Courses> {
               )
               .toList();
     } catch (error) {
-      print('Error fetching Courses: $error');
+      print('❌ Error fetching Courses: $error');
     } finally {
       setState(() => isLoading = false);
     }

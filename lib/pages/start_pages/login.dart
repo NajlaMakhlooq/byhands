@@ -29,7 +29,7 @@ class _LoginState extends State<Login> {
       await authService.signInWithEmailAndPassword(email, pw);
       UserCredential userCredential = await FirebaseAuth.instance
           .signInWithEmailAndPassword(email: email, password: pw);
-      print("Logged in as ${userCredential.user?.email}");
+      print("✅🔐 Logged in as ${userCredential.user?.email}");
       Navigator.pushNamed(context, '/Home');
     }
     // catch any error
@@ -37,7 +37,19 @@ class _LoginState extends State<Login> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text("Error: $e"),
+            content: Text(
+              "❌ Error: $e",
+              style: Theme.of(context).textTheme.bodyMedium,
+            ),
+            backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+          ),
+        );
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              "🔄 check your email and password again",
+              style: Theme.of(context).textTheme.bodyMedium,
+            ),
             backgroundColor: Theme.of(context).scaffoldBackgroundColor,
           ),
         );

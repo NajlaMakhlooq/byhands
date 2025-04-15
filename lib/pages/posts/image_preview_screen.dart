@@ -48,7 +48,7 @@ class _ImagePreviewScreenState extends State<ImagePreviewScreen> {
         });
       });
     } catch (error) {
-      print('Error fetching categories : $error');
+      print('❌ Error fetching categories : $error');
     }
   }
 
@@ -64,8 +64,6 @@ class _ImagePreviewScreenState extends State<ImagePreviewScreen> {
     await Supabase.instance.client.storage
         .from('images') // to this bucket
         .upload(path, widget.imageFile);
-
-    print("Success upload");
   }
 
   Future<void> insertData() async {
@@ -77,9 +75,8 @@ class _ImagePreviewScreenState extends State<ImagePreviewScreen> {
         'username': username,
         'Post_url': Post_url,
       });
-      print("Data inserted successfully");
     } catch (e) {
-      print("Error inserting data: $e");
+      print("❌🗂️ Error inserting data: $e");
     }
   }
 

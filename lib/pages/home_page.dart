@@ -51,7 +51,7 @@ class _DashboardPage extends State<DashboardPage> {
             [];
       });
     } catch (error) {
-      print('Error fetching categories: $error');
+      print('❌ Error fetching categories: $error');
     }
   }
 
@@ -91,7 +91,7 @@ class _DashboardPage extends State<DashboardPage> {
             [];
       });
     } catch (error) {
-      print('Error fetching users: $error');
+      print('❌ Error fetching users: $error');
     }
   }
 
@@ -116,7 +116,7 @@ class _DashboardPage extends State<DashboardPage> {
             [];
       });
     } catch (error) {
-      print('Error fetching courses: $error');
+      print('❌ Error fetching courses: $error');
     }
   }
 
@@ -520,7 +520,7 @@ class CategoryCard extends StatelessWidget {
               imageUrl,
               width:
                   MediaQuery.sizeOf(context).width *
-                  0.17, // Increased size for visibility
+                  0.10, // Increased size for visibility
               loadingBuilder: (context, child, loadingProgress) {
                 if (loadingProgress == null) return child;
                 return CircularProgressIndicator(); // Loading spinner
@@ -528,7 +528,7 @@ class CategoryCard extends StatelessWidget {
               errorBuilder: (context, error, stackTrace) {
                 return Icon(
                   Icons.image_not_supported,
-                  size: MediaQuery.sizeOf(context).width * 0.17,
+                  size: MediaQuery.sizeOf(context).width * 0.10,
                 ); // Fallback if image fails to load
               },
             ),
@@ -586,7 +586,7 @@ class UserCard extends StatelessWidget {
                 backgroundColor: const Color.fromARGB(255, 216, 222, 236),
                 backgroundImage: NetworkImage(imageUrl),
                 onBackgroundImageError: (error, stackTrace) {
-                  print('Error loading image: $error');
+                  print('📛 Error loading image: $error');
                 },
               ),
             ),

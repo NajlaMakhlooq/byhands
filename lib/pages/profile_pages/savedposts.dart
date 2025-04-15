@@ -50,7 +50,7 @@ class _Saved_posts extends State<Saved_posts> {
         isLoading = false;
       });
     } catch (error) {
-      print('Error fetching courses: $error');
+      print('❌ Error fetching courses: $error');
     }
   }
 

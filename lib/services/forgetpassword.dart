@@ -25,7 +25,7 @@ class _EmailVerificationPageState extends State<EmailVerificationPage> {
         setState(() {
           isEmailSent = true;
         });
-        print("✅ Verification email sent to ${user.email}");
+        print("✅📩 Verification email sent to ${user.email}");
       } else {
         print("❌ User is already verified or not logged in.");
         setState(() {
@@ -33,7 +33,7 @@ class _EmailVerificationPageState extends State<EmailVerificationPage> {
         });
       }
     } catch (e) {
-      print("❌ Error sending verification email: $e");
+      print("❌📩 Error sending verification email: $e");
       setState(() {
         isEmailSent = false;
       });
@@ -53,22 +53,33 @@ class _EmailVerificationPageState extends State<EmailVerificationPage> {
 
         if (user.emailVerified) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text("✅ Your email is successfully verified!")),
+            SnackBar(
+              content: Text(
+                "✅🔐 Your email is successfully verified!",
+                style: Theme.of(context).textTheme.bodyMedium,
+              ),
+            ),
           );
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(
                 "❌ Your email is not verified yet. Please check your inbox.",
+                style: Theme.of(context).textTheme.bodyMedium,
               ),
             ),
           );
         }
       }
     } catch (e) {
-      print("❌ Error checking email verification: $e");
+      print("❌🔐 Error checking email verification: $e");
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("❌ An error occurred. Please try again.")),
+        SnackBar(
+          content: Text(
+            "❌ An error occurred. Please try again.",
+            style: Theme.of(context).textTheme.bodyMedium,
+          ),
+        ),
       );
     }
   }

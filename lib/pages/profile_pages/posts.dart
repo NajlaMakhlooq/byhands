@@ -39,7 +39,7 @@ class _PostsState extends State<Posts> {
               .map((post) => {'Name': post['Name'] ?? 'Unknown'})
               .toList();
     } catch (error) {
-      print('Error fetching Courses: $error');
+      print('❌ Error fetching Courses: $error');
     } finally {
       setState(() => isLoading = false);
     }

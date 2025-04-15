@@ -62,7 +62,7 @@ class _CourseDetailPageState extends State<CourseDetailPage> {
         });
       }
     } catch (error) {
-      print("Error fetching UserID: $error");
+      print("❌ Error fetching UserID: $error");
     } finally {
       setState(() {
         isLoading = false; // Stop loading regardless of success or failure
@@ -95,7 +95,7 @@ class _CourseDetailPageState extends State<CourseDetailPage> {
             [];
       });
     } catch (error) {
-      print('Error fetching Courses: $error');
+      print('❌ Error fetching Courses: $error');
     } finally {
       setState(() {
         isLoading = false; // Stop loading regardless of success or failure
@@ -311,7 +311,7 @@ class _CourseDetailPageState extends State<CourseDetailPage> {
               .maybeSingle();
 
       if (courseResponse == null) {
-        print("No course found with the given name.");
+        print("❌ No course found with the given name.");
         return;
       }
 
@@ -358,10 +358,8 @@ class _CourseDetailPageState extends State<CourseDetailPage> {
         'user_id': userid,
         'course_id': C_id,
       });
-
-      print("Data inserted successfully");
     } catch (e) {
-      print("Error inserting data: $e");
+      print("❌🗂️ Error inserting data: $e");
     }
   }
 }

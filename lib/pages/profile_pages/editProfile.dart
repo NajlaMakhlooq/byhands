@@ -98,7 +98,7 @@ class _EditState extends State<Edit> {
 
       getURL();
     } catch (e) {
-      print("Error fetching user data: $e");
+      print("❌ Error fetching user data: $e");
       setState(() {
         _isLoading = false; // Set loading to false in case of an error
       });
@@ -113,7 +113,6 @@ class _EditState extends State<Edit> {
     if (pickedFile != null) {
       setState(() {
         _selectedImage = File(pickedFile.path);
-        print(_selectedImage);
       });
     }
   }
@@ -122,29 +121,31 @@ class _EditState extends State<Edit> {
   Future<void> upDateData() async {
     try {
       // Proceed with the update operation in Supabase
-      final update =
-          await Supabase.instance.client
-              .from('User')
-              .update({
-                'Username': usernameController.text,
-                'Email': emailController.text,
-                'Password': password, // Keep the old password
-                'Bio': _BioController.text,
-                'gender': _selectedgender,
-                'dateOfBirth': _DateController.text,
-              })
-              .eq('Username', widget.userName)
-              .select(); // This returns a PostgrestResponse
-      print("update : $update");
+      await Supabase.instance.client
+          .from('User')
+          .update({
+            'Username': usernameController.text,
+            'Email': emailController.text,
+            'Password': password, // Keep the old password
+            'Bio': _BioController.text,
+            'gender': _selectedgender,
+            'dateOfBirth': _DateController.text,
+          })
+          .eq('Username', widget.userName)
+          .select(); // This returns a PostgrestResponse
       Navigator.pop(context);
       Navigator.popAndPushNamed(context, '/profile');
     } catch (e) {
       // Handle any other errors
-      print("Error updating data: $e");
+      print("❌🔄 Error updating data: $e");
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-          content: Text('Unexpected error: $e'),
+
+          content: Text(
+            '❌ Unexpected error: $e',
+            style: Theme.of(context).textTheme.bodyMedium,
+          ),
         ),
       );
     }
@@ -156,18 +157,11 @@ class _EditState extends State<Edit> {
       //generate a unique file path
       final path = 'images/profiles/$username/${username}profile';
       //Update the file exists in the storage
-      final removedFiles = await Supabase.instance.client.storage
-          .from('images')
-          .remove([path]);
-      // remove is a StorageResponse, not a plain List, so access `.data`
-      for (var file in removedFiles) {
-        print('Deleted file: ${file.name}');
-      }
+      await Supabase.instance.client.storage.from('images').remove([path]);
 
-      final upload = await Supabase.instance.client.storage
+      await Supabase.instance.client.storage
           .from('images')
           .upload(path, _selectedImage!);
-      print("upload new image : $upload");
     }
   }
 
@@ -240,7 +234,7 @@ class _EditState extends State<Edit> {
                                           >, // Default image if no profile set
                               onBackgroundImageError: (error, stackTrace) {
                                 // Handle errors gracefully
-                                print('Error loading image: $error');
+                                print('📛 Error loading image: $error');
                               },
                             ),
                             InkWell(

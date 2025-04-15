@@ -20,6 +20,42 @@ class SettingsPage extends StatefulWidget {
 }
 
 class _SettingsPageState extends State<SettingsPage> {
+  final List<Map<String, String>> policy = [
+    {
+      'name': "1. Introduction",
+
+      'desc':
+          "This is where you explain the purpose of your app and how you handle user data.",
+    },
+    {
+      'name': "2. Information Collection",
+
+      'desc':
+          "Detail the types of information you collect from users, such as personal details, app usage data, etc.",
+    },
+    {
+      'name': "3. Use of Information",
+      'desc':
+          "Explain how you use the collected information to improve the user experience and provide services.",
+    },
+    {
+      'name': "4. Data Security",
+
+      'desc':
+          "Describe the measures you take to protect user data from unauthorized access or disclosure.",
+    },
+    {
+      'name': "5. User Rights",
+
+      'desc':
+          "Outline the rights users have regarding their data, such as the ability to access, modify, or delete their information.",
+    },
+    {
+      'name': "6. Changes to the Privacy Policy",
+      'desc':
+          "Inform users that you may update the privacy policy and how they will be notified of any changes.",
+    },
+  ];
   final supabase = prefix.Supabase.instance.client;
   bool isDarkMode = false;
   bool lang = false;
@@ -38,26 +74,16 @@ class _SettingsPageState extends State<SettingsPage> {
 
       if (response.isNotEmpty) {
         // Image exists, proceed to delete it
-        final deleteResponse = await storage.remove([
-          'images/profiles/${widget.username}',
-        ]);
-
-        if (deleteResponse.isNotEmpty) {
-          // Success message
-          print('Image deleted successfully');
-        } else {
-          // Error message during deletion
-          print('Error deleting image: $deleteResponse');
-        }
+        await storage.remove(['images/profiles/${widget.username}']);
       } else {
         // Image does not exist
-        print('Image does not exist: $response');
+        print('📛 Image does not exist: $response');
       }
       await prefix.Supabase.instance.client.from('Deleted_users').insert({
         'Email': userEmail,
       });
       await prefix.Supabase.instance.client.auth.signOut();
-      print('✅ User data deleted from Supabase');
+      print('✅🗑️ User data deleted from Supabase');
     }
   }
 
@@ -86,10 +112,7 @@ class _SettingsPageState extends State<SettingsPage> {
         if (snapshot.docs.isNotEmpty) {
           for (var doc in snapshot.docs) {
             await doc.reference.delete();
-            print(
-              "🗑 Document with username ${widget.username} deleted successfully!",
-            );
-            print('✅ User data deleted from firebase');
+            print('✅🗑️ User data deleted from firebase');
           }
         } else {
           print("❌ No document found");
@@ -98,7 +121,7 @@ class _SettingsPageState extends State<SettingsPage> {
         // Step 3: Delete user from Firebase Auth
         await user.delete();
         await FirebaseAuth.instance.signOut();
-        print('✅ Firebase user deleted successfully');
+        print('✅🗑️ Firebase user deleted successfully');
       }
     } catch (e) {
       print('❌ Error deleting Firebase user: $e');
@@ -117,15 +140,20 @@ class _SettingsPageState extends State<SettingsPage> {
             .maybeSingle();
 
     if (response?['Password'] == userPass) {
-      print("✅ Passwords match. Proceeding with deletion...");
+      print("✅🔐 Passwords match. Proceeding with deletion...");
       await deleteSupabaseUserData();
-      print("🔐 Reauthenticating with: $userEmail / $userPass");
+      print("🔄🔐 Reauthenticating with: $userEmail / $userPass");
       await deleteFirebaseUser(userEmail, userPass);
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Account deleted successfully.")),
+        SnackBar(
+          content: Text(
+            "✅🗑️🎉 Account deleted successfully.🎉🗑️✅",
+            style: Theme.of(context).textTheme.bodyMedium,
+          ),
+        ),
       );
     } else {
-      print("❌ Password mismatch. Account deletion aborted.");
+      print("❌🔐 Password mismatch. Account deletion aborted.");
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(const SnackBar(content: Text("Incorrect password.")));
@@ -179,11 +207,10 @@ class _SettingsPageState extends State<SettingsPage> {
     if (result != null) {
       setState(() {
         userPass = result;
-        print("userpassword : $userPass");
       });
       await deleteUserAccount();
       Navigator.pushNamedAndRemoveUntil(context, '/Start', (route) => false);
-      print("✅ Successfully deleted account");
+      print("✅🗑️ Successfully deleted account");
     }
   }
 
@@ -215,115 +242,106 @@ class _SettingsPageState extends State<SettingsPage> {
         ),
       ),
       drawer: CommonDrawer(),
-      body: ListView(
-        padding: const EdgeInsets.all(16.0),
-        children: [
-          Text("Settings", style: Theme.of(context).textTheme.titleLarge),
-          const Divider(),
-          Row(
-            children: [
-              Text('Dark Mode', style: Theme.of(context).textTheme.titleMedium),
-              const SizedBox(width: 10),
-              Switch(
-                value: isDarkMode,
-                onChanged: (value) {
-                  setState(() => isDarkMode = value);
-                  widget.toggleThemeMode();
-                },
-              ),
-            ],
-          ),
-          const SizedBox(height: 10),
-          Row(
-            children: [
-              Text('Language', style: Theme.of(context).textTheme.titleMedium),
-              const SizedBox(width: 10),
-              Switch(
-                value: lang,
-                onChanged: (value) => setState(() => lang = value),
-              ),
-            ],
-          ),
-          const SizedBox(height: 10),
-          Row(
-            children: [
-              Text('Text Size', style: Theme.of(context).textTheme.titleMedium),
-            ],
-          ),
-          const SizedBox(height: 20),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 40),
-            child: ElevatedButton(
-              onPressed: () => _showPasswordDialogAndDeleteAccount(context),
-              style: ElevatedButton.styleFrom(
-                foregroundColor: Colors.white,
-                backgroundColor: const Color.fromARGB(255, 54, 43, 75),
-                minimumSize: const Size(double.infinity, 50),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(50),
+      body: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Column(
+          children: [
+            Text("Settings", style: Theme.of(context).textTheme.titleLarge),
+            const Divider(),
+            Row(
+              children: [
+                Text(
+                  'Dark Mode',
+                  style: Theme.of(context).textTheme.titleMedium,
+                ),
+                const SizedBox(width: 10),
+                Switch(
+                  value: isDarkMode,
+                  onChanged: (value) {
+                    setState(() => isDarkMode = value);
+                    widget.toggleThemeMode();
+                  },
+                ),
+              ],
+            ),
+            const SizedBox(height: 10),
+            Row(
+              children: [
+                Text(
+                  'Language',
+                  style: Theme.of(context).textTheme.titleMedium,
+                ),
+                const SizedBox(width: 10),
+                Switch(
+                  value: lang,
+                  onChanged: (value) => setState(() => lang = value),
+                ),
+              ],
+            ),
+            const SizedBox(height: 10),
+            Row(
+              children: [
+                Text(
+                  'Text Size',
+                  style: Theme.of(context).textTheme.titleMedium,
+                ),
+              ],
+            ),
+            const SizedBox(height: 20),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 40),
+              child: ElevatedButton(
+                onPressed: () => _showPasswordDialogAndDeleteAccount(context),
+                style: ElevatedButton.styleFrom(
+                  foregroundColor: Colors.white,
+                  backgroundColor: const Color.fromARGB(255, 54, 43, 75),
+                  minimumSize: const Size(double.infinity, 50),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(50),
+                  ),
+                ),
+                child: const Text(
+                  "Delete account",
+                  style: TextStyle(fontWeight: FontWeight.w600, fontSize: 18),
                 ),
               ),
-              child: const Text(
-                "Delete account",
-                style: TextStyle(fontWeight: FontWeight.w600, fontSize: 18),
+            ),
+            const SizedBox(height: 30),
+            Text(
+              "Privacy Policy",
+              style: Theme.of(context).textTheme.titleLarge,
+            ),
+            const Divider(),
+            Expanded(
+              child: Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                ), // Optional padding
+                child: ListView.builder(
+                  itemCount: policy.length,
+                  itemBuilder: (context, index) {
+                    final item = policy[index];
+                    return ExpansionTile(
+                      title: Text(
+                        item['name'] ?? '',
+                        style: Theme.of(context).textTheme.bodyLarge,
+                      ),
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.all(16.0),
+                          child: Text(
+                            item['desc'] ?? '',
+                            style: Theme.of(context).textTheme.bodyMedium,
+                          ),
+                        ),
+                      ],
+                    );
+                  },
+                ),
               ),
             ),
-          ),
-          const SizedBox(height: 20),
-          _buildPrivacyPolicy(context),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildPrivacyPolicy(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text("Privacy Policy", style: Theme.of(context).textTheme.titleLarge),
-        const Divider(),
-        _policySection(
-          "1. Introduction",
-          "This is where you explain the purpose of your app and how you handle user data.",
+          ],
         ),
-        _policySection(
-          "2. Information Collection",
-          "Detail the types of information you collect from users, such as personal details, app usage data, etc.",
-        ),
-        _policySection(
-          "3. Use of Information",
-          "Explain how you use the collected information to improve the user experience and provide services.",
-        ),
-        _policySection(
-          "4. Data Security",
-          "Describe the measures you take to protect user data from unauthorized access or disclosure.",
-        ),
-        _policySection(
-          "5. User Rights",
-          "Outline the rights users have regarding their data, such as the ability to access, modify, or delete their information.",
-        ),
-        _policySection(
-          "6. Changes to the Privacy Policy",
-          "Inform users that you may update the privacy policy and how they will be notified of any changes.",
-        ),
-        _policySection(
-          "7. Contact Information",
-          "Provide contact details for users to reach out with any questions or concerns regarding the privacy policy.",
-        ),
-      ],
-    );
-  }
-
-  Widget _policySection(String title, String content) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(title, style: Theme.of(context).textTheme.titleMedium),
-          const SizedBox(height: 5),
-          Text(content, style: Theme.of(context).textTheme.bodyMedium),
-        ],
       ),
     );
   }

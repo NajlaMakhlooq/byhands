@@ -56,7 +56,7 @@ class _AddCourse extends State<AddCourse> {
         });
       });
     } catch (error) {
-      print('Error fetching categories : $error');
+      print('❌ Error fetching categories : $error');
     }
   }
 
@@ -117,7 +117,12 @@ class _AddCourse extends State<AddCourse> {
         .upload(path, _imageFile!) // in this path put this image
         .then(
           (value) => ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text("Image upload successfull")),
+            SnackBar(
+              content: Text(
+                "✅🗂️ Image upload successfull",
+                style: Theme.of(context).textTheme.bodyMedium,
+              ),
+            ),
           ),
         );
   }
@@ -134,9 +139,8 @@ class _AddCourse extends State<AddCourse> {
         'CategoryName': categorySelctor,
         'date': _DateController.text,
       });
-      print("Data inserted successfully");
     } catch (e) {
-      print("Error inserting data: $e");
+      print("❌🗂️ Error inserting data: $e");
     }
   }
 
@@ -422,7 +426,10 @@ class _AddCourse extends State<AddCourse> {
                               SnackBar(
                                 backgroundColor:
                                     Theme.of(context).scaffoldBackgroundColor,
-                                content: Text('Course name already exists'),
+                                content: Text(
+                                  '⚠️ Course name already exists',
+                                  style: Theme.of(context).textTheme.bodyMedium,
+                                ),
                               ),
                             );
                             return;
@@ -431,7 +438,6 @@ class _AddCourse extends State<AddCourse> {
                           if (_formfield.currentState!.validate()) {
                             insertData();
                             uploadImage();
-                            print("Success");
                             Navigator.popAndPushNamed(context, '/Home');
                           }
                         },

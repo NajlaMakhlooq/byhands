@@ -63,7 +63,7 @@ class _Notifications extends State<Notifications> {
         });
       }
     } catch (error) {
-      print("Error fetching UserID: $error");
+      print("❌ Error fetching UserID: $error");
     } finally {
       setState(() {
         isLoading = false; // Stop loading regardless of success or failure
@@ -96,7 +96,7 @@ class _Notifications extends State<Notifications> {
         Notifications.add(courseResponse);
       }
     } catch (error) {
-      print('Error fetching Notifications: $error');
+      print('❌ Error fetching Notifications: $error');
     }
   }
 

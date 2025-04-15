@@ -3,10 +3,12 @@ import 'package:byhands/services/auth/auth_service.dart';
 import 'package:byhands/theme.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:path_provider/path_provider.dart';
 
 class Signup extends StatefulWidget {
   const Signup({super.key});
@@ -89,32 +91,57 @@ class _SignupState extends State<Signup> {
               'uid': uid,
             });
       } catch (e) {
-        print("Error inserting data: $e");
+        print("❌🗂️ Error inserting data: $e");
       }
 
       // Navigate to home page after successful sign-up
       Navigator.popAndPushNamed(context, '/Home');
+      print("✅🎉 Account created successfully 🎉✅");
     } catch (e) {
       ScaffoldMessenger.of(
         context,
-      ).showSnackBar(SnackBar(content: Text("Error: $e")));
+      ).showSnackBar(SnackBar(content: Text("❌ Error: $e")));
     }
   }
 
   // Upload profile image to Firebase Storage
-  Future<void> uploadImage(String username) async {
-    if (_imageFile == null) return;
+  Future<void> uploadImage(String username, String gender) async {
+    final path = 'images/profiles/$username/${username}profile';
+    if (_imageFile == null) {
+      // 1. Load image from assets as bytes
+      ByteData byteData = await rootBundle.load('assets/${gender}Profile.jpg');
+      Uint8List imageBytes = byteData.buffer.asUint8List();
 
+      // 2. Save bytes to a temporary file
+      Directory tempDir = await getTemporaryDirectory();
+      String tempPath = '${tempDir.path}/my_temp_image.jpg';
+      File tempFile = File(tempPath);
+      await tempFile.writeAsBytes(imageBytes);
+      try {
+        //generate a unique file path
+        await Supabase.instance.client.storage
+            .from('images')
+            .uploadBinary(path, imageBytes);
+      } catch (e) {
+        print("📛 Error uploading image: $e");
+      }
+    } else {
+      try {
+        //generate a unique file path
+        await Supabase.instance.client.storage
+            .from('images')
+            .upload(path, _imageFile!);
+      } catch (e) {
+        print("📛 Error uploading image: $e");
+      }
+    }
     try {
       //generate a unique file path
-      final path = 'images/profiles/$username/${username}profile';
-
-      final upload = await Supabase.instance.client.storage
+      await Supabase.instance.client.storage
           .from('images')
           .upload(path, _imageFile!);
-      print("upload profile image : $upload");
     } catch (e) {
-      print("Error uploading image: $e");
+      print("📛 Error uploading image: $e");
     }
   }
 
@@ -203,7 +230,7 @@ class _SignupState extends State<Signup> {
                                       : AssetImage('assets/logo.png')
                                           as ImageProvider,
                               onBackgroundImageError: (error, stackTrace) {
-                                print('Error loading image: $error');
+                                print('📛 Error uploading image: $error');
                               },
                             ),
                           ),
@@ -365,14 +392,20 @@ class _SignupState extends State<Signup> {
                           if (usernameExists) {
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(
-                                content: Text('Username already exists'),
+                                content: Text(
+                                  '⚠️ Username already exists',
+                                  style: Theme.of(context).textTheme.bodyMedium,
+                                ),
                               ),
                             );
                             return;
                           }
 
                           if (_formfield.currentState!.validate()) {
-                            uploadImage(usernameController.text);
+                            uploadImage(
+                              usernameController.text,
+                              _selectedgender.toString(),
+                            );
                             await signUp();
                           }
                         },

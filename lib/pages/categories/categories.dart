@@ -44,7 +44,7 @@ class _CategoriesState extends State<Categories> {
         displayedCategories = allCategories;
       });
     } catch (error) {
-      print('Error fetching categories: $error');
+      print('❌ Error fetching categories: $error');
     }
   }
 
@@ -61,9 +61,41 @@ class _CategoriesState extends State<Categories> {
           'Details': descrbtionController.text,
           'Explain': explainController.text,
         });
-        print("Data inserted successfully");
+        showDialog(
+          context: context,
+          builder: (BuildContext context) {
+            return AlertDialog(
+              // title: Text("Data inserted succesfully"),
+              content: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      "Data inserted succesfully",
+                      style: Theme.of(context).textTheme.bodyLarge,
+                    ),
+                  ],
+                ),
+              ),
+              actions: [
+                TextButton(
+                  child: Text("Cancel"),
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                ),
+                TextButton(
+                  child: Text("Submit"),
+                  onPressed: () async {
+                    Navigator.pop(context);
+                  },
+                ),
+              ],
+            );
+          },
+        );
       } catch (e) {
-        print("Error inserting data: $e");
+        print("❌🗂️ Error inserting data: $e");
       }
     }
 
@@ -124,7 +156,10 @@ class _CategoriesState extends State<Categories> {
                     SnackBar(
                       backgroundColor:
                           Theme.of(context).scaffoldBackgroundColor,
-                      content: Text('Category already exists'),
+                      content: Text(
+                        '⚠️ Category already exists',
+                        style: Theme.of(context).textTheme.bodyMedium,
+                      ),
                     ),
                   );
                   return;
