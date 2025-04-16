@@ -1,9 +1,9 @@
 import 'dart:io';
-import 'package:byhands/theme.dart';
+import 'package:byhands/theme/theme.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:supabase_flutter/supabase_flutter.dart' as prefix;
 
 class Edit extends StatefulWidget {
   final String userName;
@@ -16,7 +16,6 @@ class Edit extends StatefulWidget {
 class _EditState extends State<Edit> {
   String username = "";
   String email = "";
-  String password = "";
   String Bio = "";
   String gender = "";
   String dateOfBirth = "";
@@ -30,7 +29,8 @@ class _EditState extends State<Edit> {
   final _DateController = TextEditingController();
   String? _selectedgender;
   final List<String> _genderItems = ['Male', 'Female'];
-  final SupabaseClient supabase = Supabase.instance.client; // open the database
+  final prefix.SupabaseClient supabase =
+      prefix.Supabase.instance.client; // open the database
   bool passToggle = true;
   bool confirmPassToggle = true;
   bool _isLoading = true; // Loading state for the data fetch
@@ -71,7 +71,6 @@ class _EditState extends State<Edit> {
           username = response['Username'] ?? "Unknown User";
           Bio = response['Bio'] ?? "No Bio";
           email = response['Email'] ?? "No Email";
-          password = response['Password'] ?? "No password";
           gender = response['gender'] ?? "No gender";
           dateOfBirth = response['dateOfBirth'] ?? "No date";
 
@@ -121,12 +120,11 @@ class _EditState extends State<Edit> {
   Future<void> upDateData() async {
     try {
       // Proceed with the update operation in Supabase
-      await Supabase.instance.client
+      await supabase
           .from('User')
           .update({
             'Username': usernameController.text,
             'Email': emailController.text,
-            'Password': password, // Keep the old password
             'Bio': _BioController.text,
             'gender': _selectedgender,
             'dateOfBirth': _DateController.text,
@@ -157,11 +155,9 @@ class _EditState extends State<Edit> {
       //generate a unique file path
       final path = 'images/profiles/$username/${username}profile';
       //Update the file exists in the storage
-      await Supabase.instance.client.storage.from('images').remove([path]);
+      await supabase.storage.from('images').remove([path]);
 
-      await Supabase.instance.client.storage
-          .from('images')
-          .upload(path, _selectedImage!);
+      await supabase.storage.from('images').upload(path, _selectedImage!);
     }
   }
 
@@ -227,7 +223,7 @@ class _EditState extends State<Edit> {
                                       ? NetworkImage(url_profile)
                                           as ImageProvider<
                                             Object
-                                          > // Use url if there's a saved profile
+                                          > // Use url if there's a Saved profile
                                       : const AssetImage('assets/logo.png')
                                           as ImageProvider<
                                             Object

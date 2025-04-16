@@ -1,7 +1,7 @@
 import 'package:byhands/pages/posts/Post_detail.dart';
-import 'package:byhands/theme.dart';
+import 'package:byhands/theme/theme.dart';
 import 'package:flutter/material.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:supabase_flutter/supabase_flutter.dart' as prefix;
 
 class CategoryDetailPage extends StatefulWidget {
   final String categoryName;
@@ -13,7 +13,7 @@ class CategoryDetailPage extends StatefulWidget {
 }
 
 class _CategoryDetailPageState extends State<CategoryDetailPage> {
-  final SupabaseClient supabase = Supabase.instance.client;
+  final prefix.SupabaseClient supabase = prefix.Supabase.instance.client;
   String? imageUrl; // Initially, the image URL is null, waiting to be fetched.
   String? description;
   List<Map<String, dynamic>> details = [];
@@ -152,7 +152,7 @@ class PostCard extends StatefulWidget {
 }
 
 class _PostCardState extends State<PostCard> {
-  final SupabaseClient supabase = Supabase.instance.client;
+  final prefix.SupabaseClient supabase = prefix.Supabase.instance.client;
 
   @override
   Widget build(BuildContext context) {

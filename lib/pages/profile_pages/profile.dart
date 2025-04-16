@@ -1,9 +1,10 @@
 import 'package:byhands/pages/profile_pages/profileHeader.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:byhands/pages/menus/side_menu.dart';
 import 'package:byhands/pages/profile_pages/Usercourses.dart';
 import 'package:byhands/pages/profile_pages/posts.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:supabase_flutter/supabase_flutter.dart' as prefix;
 
 // ignore: must_be_immutable
 class Profile extends StatefulWidget {
@@ -14,7 +15,8 @@ class Profile extends StatefulWidget {
 }
 
 class _ProfileState extends State<Profile> {
-  final SupabaseClient supabase = Supabase.instance.client; // open the database
+  final prefix.SupabaseClient supabase =
+      prefix.Supabase.instance.client; // open the database
   bool loading = true; // Add loading state
   String username = "";
   bool profileHeaderCheck = false;
@@ -26,9 +28,8 @@ class _ProfileState extends State<Profile> {
   }
 
   Future<void> fetchUsername() async {
-    final session = supabase.auth.currentSession;
-    final user = session?.user;
-    final email = user?.email;
+    final User? user = FirebaseAuth.instance.currentUser;
+    final String? email = user?.email;
 
     if (email == null) {
       setState(() {

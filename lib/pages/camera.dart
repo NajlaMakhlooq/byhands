@@ -30,12 +30,13 @@ class _CameraState extends State<Camera> {
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
         backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
-        title: Text("Camera", style: Theme.of(context).textTheme.titleLarge),
+        title: Text("Camera", style: Theme.of(context).textTheme.titleSmall),
         leading: Builder(
           builder: (BuildContext context) {
             return IconButton(
               icon: Icon(
                 Icons.menu,
+                size: 30,
                 color:
                     Theme.of(context).brightness == Brightness.dark
                         ? const Color.fromARGB(
@@ -63,26 +64,19 @@ class _CameraState extends State<Camera> {
               Navigator.popAndPushNamed(context, '/Home');
             },
             icon: const Icon(Icons.home),
+            iconSize: 30,
           ),
         ],
       ),
       drawer: CommonDrawer(),
       body: _buildUI(),
-      floatingActionButton: Container(
-        decoration: BoxDecoration(
-          color: const Color.fromARGB(255, 247, 246, 251),
-          shape: BoxShape.rectangle,
-          borderRadius: BorderRadius.circular(
-            50.0,
-          ), // Adjust for the desired shape
-        ),
-        child: IconButton(
-          icon: const Icon(
-            Icons.photo,
-            color: Color.fromARGB(255, 54, 43, 75),
-          ), // Adjust icon color if necessary
-          onPressed: _pickImageFromGallery,
-        ),
+      floatingActionButton: IconButton(
+        icon: const Icon(
+          Icons.photo,
+          color: Color.fromARGB(255, 54, 43, 75),
+        ), // Adjust icon color if necessary
+        onPressed: _pickImageFromGallery,
+        iconSize: 40,
       ),
     );
   }
@@ -113,6 +107,7 @@ class _CameraState extends State<Camera> {
                 child: CameraPreview(cameraController!),
               ),
             ),
+            SizedBox(height: 15),
             IconButton(
               padding: const EdgeInsets.fromLTRB(0, 10, 0, 0),
               onPressed: () async {

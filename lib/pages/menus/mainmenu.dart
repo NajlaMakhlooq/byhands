@@ -27,6 +27,7 @@ class mainMenu extends StatelessWidget {
       GButton(
         icon: Icons.dashboard,
         text: 'Dashboard',
+        textStyle: Theme.of(context).textTheme.labelSmall,
         onPressed: () {
           Navigator.popAndPushNamed(context, '/Home');
         },
@@ -34,6 +35,8 @@ class mainMenu extends StatelessWidget {
       GButton(
         icon: Icons.list,
         text: 'Category',
+        textStyle: Theme.of(context).textTheme.labelSmall,
+
         onPressed: () {
           Navigator.popAndPushNamed(context, '/Categories');
         },
@@ -41,6 +44,8 @@ class mainMenu extends StatelessWidget {
       GButton(
         icon: Icons.add_a_photo,
         text: 'Camera',
+        textStyle: Theme.of(context).textTheme.labelSmall,
+
         onPressed: () {
           Navigator.popAndPushNamed(context, '/Camera');
         },
@@ -48,6 +53,8 @@ class mainMenu extends StatelessWidget {
       GButton(
         icon: Icons.menu_book,
         text: 'Courses',
+        textStyle: Theme.of(context).textTheme.labelSmall,
+
         onPressed: () {
           Navigator.popAndPushNamed(context, '/Courses');
         },
@@ -55,6 +62,7 @@ class mainMenu extends StatelessWidget {
       GButton(
         icon: Icons.chat,
         text: 'Chats',
+        textStyle: Theme.of(context).textTheme.bodyLarge,
         onPressed: () {
           Navigator.popAndPushNamed(context, '/Chats');
         },

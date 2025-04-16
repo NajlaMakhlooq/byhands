@@ -1,8 +1,8 @@
 import 'package:byhands/pages/menus/mainmenu.dart';
-import 'package:byhands/theme.dart';
+import 'package:byhands/theme/theme.dart';
 import 'package:flutter/material.dart';
 import 'package:byhands/pages/menus/side_menu.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:supabase_flutter/supabase_flutter.dart' as prefix;
 import 'package:byhands/pages/courses/Course_details.dart';
 
 class Courses extends StatefulWidget {
@@ -13,7 +13,7 @@ class Courses extends StatefulWidget {
 }
 
 class _CoursesState extends State<Courses> {
-  final SupabaseClient supabase = Supabase.instance.client;
+  final prefix.SupabaseClient supabase = prefix.Supabase.instance.client;
   List<Map<String, dynamic>> allCourses = [];
   List<Map<String, dynamic>> displayedCourses = [];
   String searchQuery = '';

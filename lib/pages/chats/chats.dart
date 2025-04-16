@@ -2,9 +2,10 @@ import 'package:byhands/pages/chats/addnewChat.dart';
 import 'package:byhands/pages/chats/chatDetails.dart';
 import 'package:byhands/pages/menus/mainmenu.dart';
 import 'package:byhands/pages/menus/side_menu.dart';
-import 'package:byhands/theme.dart';
+import 'package:byhands/theme/theme.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:supabase_flutter/supabase_flutter.dart' as prefix;
 
 class Chats extends StatefulWidget {
   const Chats({super.key});
@@ -14,7 +15,7 @@ class Chats extends StatefulWidget {
 }
 
 class _ChatsState extends State<Chats> {
-  final SupabaseClient supabase = Supabase.instance.client;
+  final prefix.SupabaseClient supabase = prefix.Supabase.instance.client;
   List<Map<String, dynamic>> messages = [];
   List<Map<String, dynamic>> conversations = [];
   String username = "";
@@ -28,9 +29,8 @@ class _ChatsState extends State<Chats> {
 
   Future<void> fetchUsername() async {
     // get the user email
-    final session = supabase.auth.currentSession;
-    final user = session?.user;
-    final email = user?.email;
+    final User? user = FirebaseAuth.instance.currentUser;
+    final String? email = user?.email;
     if (email == null) {
       setState(() {
         username = "";
@@ -85,7 +85,7 @@ class _ChatsState extends State<Chats> {
           Padding(
             padding: const EdgeInsets.all(8.0),
             child: TextButton(
-              style: buttonsDesign(context),
+              style: CustomElevatedButtonTheme(context),
               onPressed: () {
                 Navigator.push(
                   context,
@@ -146,56 +146,16 @@ class _ChatsState extends State<Chats> {
                     SizedBox(
                       width: 300,
                       child: TextButton(
-                        style: buttonsDesign(context),
+                        style: CustomElevatedButtonTheme(context),
                         onPressed: () {
-                          if (conversations.isNotEmpty) {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder:
-                                    (context) => Addnewchat(
-                                      conversations: conversations,
-                                    ),
-                              ),
-                            );
-                          } else {
-                            showDialog(
-                              context: context,
-                              builder: (BuildContext context) {
-                                return AlertDialog(
-                                  title: Text("Follow a new user"),
-                                  content: SingleChildScrollView(
-                                    child: Column(
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: [
-                                        Text(
-                                          "You are chatting with all your friends follow a new user to chat with or press the button in their profile to chat ",
-                                          style:
-                                              Theme.of(
-                                                context,
-                                              ).textTheme.bodyLarge,
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                  actions: [
-                                    TextButton(
-                                      child: Text("Cancel"),
-                                      onPressed: () {
-                                        Navigator.of(context).pop();
-                                      },
-                                    ),
-                                    TextButton(
-                                      child: Text("Submit"),
-                                      onPressed: () async {
-                                        Navigator.pop(context);
-                                      },
-                                    ),
-                                  ],
-                                );
-                              },
-                            );
-                          }
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder:
+                                  (context) =>
+                                      Addnewchat(conversations: conversations),
+                            ),
+                          );
                         },
                         child: Text(
                           'Start new conversation...',

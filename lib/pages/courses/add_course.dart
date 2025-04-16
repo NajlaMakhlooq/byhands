@@ -1,9 +1,10 @@
 import 'dart:io';
-import 'package:byhands/theme.dart';
+import 'package:byhands/theme/theme.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:supabase_flutter/supabase_flutter.dart' as prefix;
 import 'package:image/image.dart' as img; // For cropping functionality
 
 class AddCourse extends StatefulWidget {
@@ -14,7 +15,8 @@ class AddCourse extends StatefulWidget {
 }
 
 class _AddCourse extends State<AddCourse> {
-  final SupabaseClient supabase = Supabase.instance.client; // open the database
+  final prefix.SupabaseClient supabase =
+      prefix.Supabase.instance.client; // open the database
   String username = ""; // course provider username
   final _formfield = GlobalKey<FormState>(); // form of the course details
   final nameController = TextEditingController(); // course name controller
@@ -112,7 +114,7 @@ class _AddCourse extends State<AddCourse> {
     //generate a unique filr path
     final path = 'courses/${nameController.text}';
     //upload the image to supabase storage
-    await Supabase.instance.client.storage
+    await supabase.storage
         .from('images') // to this bucket
         .upload(path, _imageFile!) // in this path put this image
         .then(
@@ -130,7 +132,7 @@ class _AddCourse extends State<AddCourse> {
   Future<void> insertData() async {
     try {
       // insert the data in the database if vaild
-      await Supabase.instance.client.from('Courses').insert({
+      await supabase.from('Courses').insert({
         'Name': nameController.text,
         'Description': descController.text,
         'price': priceController.text,
@@ -145,10 +147,8 @@ class _AddCourse extends State<AddCourse> {
   }
 
   Future<void> fetchUsername() async {
-    final session = supabase.auth.currentSession;
-    final user = session?.user;
-    final email = user?.email;
-
+    final User? user = FirebaseAuth.instance.currentUser;
+    final String? email = user?.email;
     if (email == null) {
       setState(() {
         username = "No user logged in";
@@ -170,11 +170,7 @@ class _AddCourse extends State<AddCourse> {
 
   Future<bool> checkCoursenameExists(String name) async {
     final response =
-        await Supabase.instance.client
-            .from('Courses')
-            .select()
-            .eq('Name', name)
-            .maybeSingle();
+        await supabase.from('Courses').select().eq('Name', name).maybeSingle();
 
     if (response != null) {
       return true; // course name exists

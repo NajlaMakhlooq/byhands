@@ -1,7 +1,7 @@
 import 'package:byhands/pages/profile_pages/followerList_display.dart';
 import 'package:byhands/pages/profile_pages/followingList_display.dart';
 import 'package:flutter/material.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:supabase_flutter/supabase_flutter.dart' as prefix;
 import 'package:byhands/pages/profile_pages/editProfile.dart';
 
 class profileHeader extends StatefulWidget {
@@ -13,7 +13,8 @@ class profileHeader extends StatefulWidget {
 }
 
 class _profileHeader extends State<profileHeader> {
-  final SupabaseClient supabase = Supabase.instance.client; // open the database
+  final prefix.SupabaseClient supabase =
+      prefix.Supabase.instance.client; // open the database
   String Bio = "";
   String userId = "";
   String url_profile = "";
@@ -140,6 +141,7 @@ class _profileHeader extends State<profileHeader> {
                 ),
                 InkWell(
                   onTap: () {
+                    Navigator.pop(context);
                     Navigator.push(
                       context,
                       MaterialPageRoute(

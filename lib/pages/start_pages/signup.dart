@@ -1,13 +1,13 @@
 import 'dart:io';
 import 'package:byhands/services/auth/auth_service.dart';
-import 'package:byhands/theme.dart';
+import 'package:byhands/theme/theme.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:supabase_flutter/supabase_flutter.dart' as prefix;
 import 'package:path_provider/path_provider.dart';
 
 class Signup extends StatefulWidget {
@@ -29,7 +29,8 @@ class _SignupState extends State<Signup> {
   String? _selectedgender;
   final List<String> _genderItems = ['Male', 'Female'];
   File? _imageFile;
-
+  final prefix.SupabaseClient supabase =
+      prefix.Supabase.instance.client; // open the database
   bool passToggle = true;
   bool confirmPassToggle = true;
 
@@ -47,7 +48,7 @@ class _SignupState extends State<Signup> {
   // Check if username exists in Firestore
   Future<bool> checkUsernameExists(String username) async {
     final response =
-        await Supabase.instance.client
+        await supabase
             .from('User')
             .select()
             .eq('Username', username)
@@ -66,18 +67,21 @@ class _SignupState extends State<Signup> {
     final password = passController.text;
 
     try {
+      await authService.signInWithEmailAndPassword(
+        "byhandsapplication@gmail.com",
+        "ByhandsapplicationDatabase_2025",
+      );
       // 1. Create user with email and password
       UserCredential userCredential = await FirebaseAuth.instance
           .createUserWithEmailAndPassword(email: email, password: password);
-      await authService.signUpWithEmailAndPassword(email, password);
+      //await authService.signUpWithEmailAndPassword(email, password);
       String uid = userCredential.user?.uid ?? 'No UID found';
 
       // 2. Add user data to database after successful registration
       try {
-        await Supabase.instance.client.from('User').insert({
+        await supabase.from('User').insert({
           'Username': usernameController.text,
           'Email': emailController.text,
-          'Password': passController.text,
           'Bio': _BioController.text,
           'gender': _selectedgender,
           'dateOfBirth': _ageController.text,
@@ -119,27 +123,21 @@ class _SignupState extends State<Signup> {
       await tempFile.writeAsBytes(imageBytes);
       try {
         //generate a unique file path
-        await Supabase.instance.client.storage
-            .from('images')
-            .uploadBinary(path, imageBytes);
+        await supabase.storage.from('images').uploadBinary(path, imageBytes);
       } catch (e) {
         print("📛 Error uploading image: $e");
       }
     } else {
       try {
         //generate a unique file path
-        await Supabase.instance.client.storage
-            .from('images')
-            .upload(path, _imageFile!);
+        await supabase.storage.from('images').upload(path, _imageFile!);
       } catch (e) {
         print("📛 Error uploading image: $e");
       }
     }
     try {
       //generate a unique file path
-      await Supabase.instance.client.storage
-          .from('images')
-          .upload(path, _imageFile!);
+      await supabase.storage.from('images').upload(path, _imageFile!);
     } catch (e) {
       print("📛 Error uploading image: $e");
     }
@@ -189,7 +187,7 @@ class _SignupState extends State<Signup> {
                   SizedBox(height: 10),
                   Text(
                     "Create your new account!",
-                    style: Theme.of(context).textTheme.bodyMedium,
+                    style: Theme.of(context).textTheme.labelMedium,
                   ),
                 ],
               ),
@@ -472,7 +470,11 @@ class _SignupState extends State<Signup> {
         child: DropdownButtonHideUnderline(
           child: DropdownButton<String>(
             value: _selectedgender,
-            hint: Text('Select a gender'),
+            hint: Text(
+              'Select a gender',
+              style: Theme.of(context).textTheme.labelSmall,
+            ),
+            style: Theme.of(context).textTheme.labelSmall,
             items:
                 _genderItems.map((String item) {
                   return DropdownMenuItem<String>(

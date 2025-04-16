@@ -1,7 +1,8 @@
 import 'package:byhands/pages/chats/chatDetails.dart';
-import 'package:byhands/theme.dart';
+import 'package:byhands/theme/theme.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:supabase_flutter/supabase_flutter.dart' as prefix;
 
 class Addnewchat extends StatefulWidget {
   Addnewchat({super.key, required this.conversations});
@@ -12,7 +13,7 @@ class Addnewchat extends StatefulWidget {
 }
 
 class _AddnewchatState extends State<Addnewchat> {
-  final SupabaseClient supabase = Supabase.instance.client;
+  final prefix.SupabaseClient supabase = prefix.Supabase.instance.client;
   List<dynamic> followingList = [];
   List<dynamic> displayedFollowing = [];
   String searchQuery = '';
@@ -25,9 +26,8 @@ class _AddnewchatState extends State<Addnewchat> {
   }
 
   Future<void> list() async {
-    final session = supabase.auth.currentSession;
-    final user = session?.user;
-    final email = user?.email;
+    final User? user = FirebaseAuth.instance.currentUser;
+    final String? email = user?.email;
 
     //use the email to search for username
     final response =
@@ -79,7 +79,7 @@ class _AddnewchatState extends State<Addnewchat> {
     String username2,
   ) async {
     try {
-      await Supabase.instance.client.from('conversations').insert({
+      await supabase.from('conversations').insert({
         'username1': userame1,
         'username2': username2,
       });
@@ -154,12 +154,13 @@ class _AddnewchatState extends State<Addnewchat> {
                             decoration: customContainerDecoration(context),
                             child: ListTile(
                               onTap: () async {
-                                await Supabase.instance.client
+                                await prefix.Supabase.instance.client
                                     .from('conversations')
                                     .insert({
                                       'username1': username,
                                       'username2': UserInfo['following_to'],
                                     });
+                                Navigator.pop(context);
                                 Navigator.push(
                                   context,
                                   MaterialPageRoute(
@@ -219,7 +220,7 @@ class _AddnewchatState extends State<Addnewchat> {
 
 Future<bool> checkCategorynameExists(String name) async {
   final response =
-      await Supabase.instance.client
+      await prefix.Supabase.instance.client
           .from('categories')
           .select()
           .eq('Name', name)

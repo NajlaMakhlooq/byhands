@@ -1,7 +1,8 @@
-import 'package:byhands/theme.dart';
+import 'package:byhands/theme/theme.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:byhands/pages/menus/side_menu.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:supabase_flutter/supabase_flutter.dart' as prefix;
 
 // ignore: camel_case_types
 class Notifications extends StatefulWidget {
@@ -12,7 +13,7 @@ class Notifications extends StatefulWidget {
 }
 
 class _Notifications extends State<Notifications> {
-  final SupabaseClient supabase = Supabase.instance.client;
+  final prefix.SupabaseClient supabase = prefix.Supabase.instance.client;
   int userid = 0;
   List<Map<String, dynamic>> Notifications = [];
   bool isLoading = true; // To show a loading indicator
@@ -30,9 +31,8 @@ class _Notifications extends State<Notifications> {
       });
 
       // Get the user session and email
-      final session = supabase.auth.currentSession;
-      final user = session?.user;
-      final email = user?.email;
+      final User? user = FirebaseAuth.instance.currentUser;
+      final String? email = user?.email;
 
       if (email == null) {
         setState(() {
@@ -55,7 +55,7 @@ class _Notifications extends State<Notifications> {
           userid = response['UserID'];
         });
 
-        // Fetch the liked courses after obtaining UserID
+        // Fetch the Saved courses after obtaining UserID
         await fetchNotifications();
       } else {
         setState(() {
@@ -73,7 +73,7 @@ class _Notifications extends State<Notifications> {
 
   Future<void> fetchNotifications() async {
     try {
-      // Fetch liked course IDs for the user
+      // Fetch Saved course IDs for the user
       final response = await supabase
           .from('Notifications')
           .select()

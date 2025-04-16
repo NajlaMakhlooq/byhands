@@ -1,6 +1,6 @@
 import 'package:byhands/pages/posts/Post_detail.dart';
 import 'package:flutter/material.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:supabase_flutter/supabase_flutter.dart' as prefix;
 
 class Posts extends StatefulWidget {
   final String userName;
@@ -11,7 +11,8 @@ class Posts extends StatefulWidget {
 }
 
 class _PostsState extends State<Posts> {
-  final SupabaseClient supabase = Supabase.instance.client; // open the database
+  final prefix.SupabaseClient supabase =
+      prefix.Supabase.instance.client; // open the database
 
   List<Map<String, dynamic>> posts = [];
   bool isLoading = true;
@@ -80,7 +81,8 @@ class PostCard extends StatefulWidget {
 }
 
 class _PostCardState extends State<PostCard> {
-  final SupabaseClient supabase = Supabase.instance.client; // open the database
+  final prefix.SupabaseClient supabase =
+      prefix.Supabase.instance.client; // open the database
 
   @override
   Widget build(BuildContext context) {

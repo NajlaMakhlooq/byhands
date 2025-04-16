@@ -1,21 +1,21 @@
-import 'package:byhands/theme.dart';
+import 'package:byhands/theme/theme.dart';
 import 'package:flutter/material.dart';
 import 'package:byhands/pages/menus/side_menu.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:supabase_flutter/supabase_flutter.dart' as prefix;
 import 'package:byhands/pages/posts/Post_detail.dart';
 
 // ignore: camel_case_types
-class Saved_posts extends StatefulWidget {
-  Saved_posts({super.key, required this.username});
+class Liked_posts extends StatefulWidget {
+  Liked_posts({super.key, required this.username});
   String username;
 
   @override
-  State<Saved_posts> createState() => _Saved_posts();
+  State<Liked_posts> createState() => _Liked_posts();
 }
 
-class _Saved_posts extends State<Saved_posts> {
-  final SupabaseClient supabase = Supabase.instance.client;
-  List<Map<String, dynamic>> savedPosts = [];
+class _Liked_posts extends State<Liked_posts> {
+  final prefix.SupabaseClient supabase = prefix.Supabase.instance.client;
+  List<Map<String, dynamic>> SavedPosts = [];
   bool isLoading = true; // To show a loading indicator
 
   @override
@@ -27,24 +27,24 @@ class _Saved_posts extends State<Saved_posts> {
   Future<void> fetchPosts() async {
     try {
       final response = await supabase
-          .from('Saved_posts')
+          .from('Liked_posts')
           .select()
           .eq('username', widget.username);
 
-      List<int> Saved_postsId =
+      List<int> Liked_postsId =
           (response as List<dynamic>?)
               ?.map((e) => e['post_id'] as int)
               .toList() ??
           [];
-      for (int i = 0; i < Saved_postsId.length; i++) {
+      for (int i = 0; i < Liked_postsId.length; i++) {
         final response =
             await supabase
                 .from('Post')
                 .select()
-                .eq('postID', Saved_postsId[i])
+                .eq('postID', Liked_postsId[i])
                 .single(); // Fetch a single item
 
-        savedPosts.add(response);
+        SavedPosts.add(response);
       }
       setState(() {
         isLoading = false;
@@ -60,7 +60,7 @@ class _Saved_posts extends State<Saved_posts> {
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
         backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
-        title: const Text("Saved posts"),
+        title: const Text("Liked Posts"),
         actions: <Widget>[
           IconButton(
             onPressed: () {
@@ -106,12 +106,12 @@ class _Saved_posts extends State<Saved_posts> {
                 children: [
                   Expanded(
                     child:
-                        savedPosts.isEmpty
+                        SavedPosts.isEmpty
                             ? Center(child: Text('No Posts Saved.'))
                             : ListView.builder(
-                              itemCount: savedPosts.length,
+                              itemCount: SavedPosts.length,
                               itemBuilder: (context, index) {
-                                final Post = savedPosts[index];
+                                final Post = SavedPosts[index];
                                 return Padding(
                                   padding: const EdgeInsets.symmetric(
                                     horizontal: 10,

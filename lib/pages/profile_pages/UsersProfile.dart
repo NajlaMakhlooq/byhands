@@ -1,9 +1,9 @@
 import 'package:byhands/pages/chats/chatDetails.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:byhands/pages/menus/side_menu.dart';
 import 'package:byhands/pages/profile_pages/Usercourses.dart';
 import 'package:byhands/pages/profile_pages/posts.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:supabase_flutter/supabase_flutter.dart' as prefix;
 
 // ignore: must_be_immutable
 class UsersProfile extends StatefulWidget {
@@ -15,7 +15,7 @@ class UsersProfile extends StatefulWidget {
 }
 
 class _UsersProfileState extends State<UsersProfile> {
-  final SupabaseClient supabase = Supabase.instance.client;
+  final prefix.SupabaseClient supabase = prefix.Supabase.instance.client;
 
   @override
   void initState() {
@@ -38,30 +38,10 @@ class _UsersProfileState extends State<UsersProfile> {
             icon: const Icon(Icons.home),
           ),
         ],
-        leading: Builder(
-          builder: (BuildContext context) {
-            return IconButton(
-              icon: Icon(
-                Icons.menu,
-                color:
-                    Theme.of(context).brightness == Brightness.dark
-                        ? const Color.fromARGB(
-                          255,
-                          135,
-                          128,
-                          139,
-                        ) // Dark mode color
-                        : const Color.fromARGB(
-                          255,
-                          203,
-                          194,
-                          205,
-                        ), // Light mode color
-              ),
-              onPressed: () {
-                Scaffold.of(context).openDrawer();
-              },
-            );
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back),
+          onPressed: () {
+            Navigator.popAndPushNamed(context, '/Home');
           },
         ),
       ),
@@ -104,7 +84,6 @@ class _UsersProfileState extends State<UsersProfile> {
           ),
         ),
       ),
-      drawer: CommonDrawer(),
     );
   }
 }
@@ -118,7 +97,8 @@ class Others_profileHeader extends StatefulWidget {
 }
 
 class _Others_profileHeader extends State<Others_profileHeader> {
-  final SupabaseClient supabase = Supabase.instance.client; // open the database
+  final prefix.SupabaseClient supabase =
+      prefix.Supabase.instance.client; // open the database
   String Bio = "";
   String userId = "";
   String url_profile = "";
@@ -161,9 +141,8 @@ class _Others_profileHeader extends State<Others_profileHeader> {
       return;
     }
 
-    final session = supabase.auth.currentSession;
-    final user = session?.user;
-    final email = user?.email;
+    final User? user = FirebaseAuth.instance.currentUser;
+    final String? email = user?.email;
 
     final ThisUser =
         await supabase.from('User').select().eq('Email', email!).maybeSingle();
@@ -238,7 +217,7 @@ class _Others_profileHeader extends State<Others_profileHeader> {
 
     Future<void> checkfollowed() async {
       final existingFollow =
-          await Supabase.instance.client
+          await supabase
               .from('Friendship')
               .select()
               .eq('followed_by', currentUser)
@@ -300,20 +279,15 @@ class _Others_profileHeader extends State<Others_profileHeader> {
                     TextButton(
                       onPressed: () async {
                         if (check == false) {
-                          await Supabase.instance.client
-                              .from('Friendship')
-                              .insert({
-                                'followed_by': currentUser,
-                                'following_to': widget.username,
-                              });
+                          await supabase.from('Friendship').insert({
+                            'followed_by': currentUser,
+                            'following_to': widget.username,
+                          });
                         } else {
-                          await Supabase.instance.client
-                              .from('Friendship')
-                              .delete()
-                              .match({
-                                'followed_by': currentUser,
-                                'following_to': widget.username,
-                              });
+                          await supabase.from('Friendship').delete().match({
+                            'followed_by': currentUser,
+                            'following_to': widget.username,
+                          });
                         }
                         Navigator.pop(context);
                         Navigator.push(
@@ -330,12 +304,10 @@ class _Others_profileHeader extends State<Others_profileHeader> {
                     ),
                     IconButton(
                       onPressed: () async {
-                        await Supabase.instance.client
-                            .from('conversations')
-                            .insert({
-                              'username1': currentUser,
-                              'username2': widget.username,
-                            });
+                        await supabase.from('conversations').insert({
+                          'username1': currentUser,
+                          'username2': widget.username,
+                        });
                         Navigator.push(
                           context,
                           MaterialPageRoute(

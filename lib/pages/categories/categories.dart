@@ -1,9 +1,9 @@
 import 'package:byhands/pages/menus/mainmenu.dart';
 import 'package:byhands/pages/categories/category_details.dart';
-import 'package:byhands/theme.dart';
+import 'package:byhands/theme/theme.dart';
 import 'package:flutter/material.dart';
 import 'package:byhands/pages/menus/side_menu.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:supabase_flutter/supabase_flutter.dart' as prefix;
 
 class Categories extends StatefulWidget {
   const Categories({super.key});
@@ -13,7 +13,7 @@ class Categories extends StatefulWidget {
 }
 
 class _CategoriesState extends State<Categories> {
-  final SupabaseClient supabase = Supabase.instance.client;
+  final prefix.SupabaseClient supabase = prefix.Supabase.instance.client;
   List<Map<String, dynamic>> allCategories = [];
   List<Map<String, dynamic>> displayedCategories = [];
   String searchQuery = '';
@@ -56,7 +56,7 @@ class _CategoriesState extends State<Categories> {
 
     Future<void> insertRequest() async {
       try {
-        await Supabase.instance.client.from('category_requests').insert({
+        await supabase.from('category_requests').insert({
           'categoryName': nameController.text,
           'Details': descrbtionController.text,
           'Explain': explainController.text,
@@ -65,7 +65,6 @@ class _CategoriesState extends State<Categories> {
           context: context,
           builder: (BuildContext context) {
             return AlertDialog(
-              // title: Text("Data inserted succesfully"),
               content: SingleChildScrollView(
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
@@ -79,13 +78,7 @@ class _CategoriesState extends State<Categories> {
               ),
               actions: [
                 TextButton(
-                  child: Text("Cancel"),
-                  onPressed: () {
-                    Navigator.of(context).pop();
-                  },
-                ),
-                TextButton(
-                  child: Text("Submit"),
+                  child: Text("Ok"),
                   onPressed: () async {
                     Navigator.pop(context);
                   },
@@ -359,7 +352,7 @@ class _CategoriesState extends State<Categories> {
 
 Future<bool> checkCategorynameExists(String name) async {
   final response =
-      await Supabase.instance.client
+      await prefix.Supabase.instance.client
           .from('categories')
           .select()
           .eq('Name', name)

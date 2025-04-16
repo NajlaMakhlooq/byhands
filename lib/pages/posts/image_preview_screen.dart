@@ -1,7 +1,9 @@
 import 'dart:io';
-import 'package:byhands/theme.dart';
+import 'package:byhands/pages/posts/Post_detail.dart';
+import 'package:byhands/theme/theme.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:supabase_flutter/supabase_flutter.dart' as prefix;
 
 class ImagePreviewScreen extends StatefulWidget {
   final File imageFile;
@@ -13,7 +15,8 @@ class ImagePreviewScreen extends StatefulWidget {
 }
 
 class _ImagePreviewScreenState extends State<ImagePreviewScreen> {
-  final SupabaseClient supabase = Supabase.instance.client; // open the database
+  final prefix.SupabaseClient supabase =
+      prefix.Supabase.instance.client; // open the database
   final _formfield = GlobalKey<FormState>();
   String username = "";
   final content_text = TextEditingController();
@@ -61,14 +64,14 @@ class _ImagePreviewScreenState extends State<ImagePreviewScreen> {
     });
 
     //upload the image to supabase storage
-    await Supabase.instance.client.storage
+    await supabase.storage
         .from('images') // to this bucket
         .upload(path, widget.imageFile);
   }
 
   Future<void> insertData() async {
     try {
-      await Supabase.instance.client.from('Post').insert({
+      await supabase.from('Post').insert({
         'Content_Text': content_text.text,
         'category': categorySelctor,
         'Name': Post_name.text,
@@ -81,9 +84,8 @@ class _ImagePreviewScreenState extends State<ImagePreviewScreen> {
   }
 
   Future<void> fetchUsername() async {
-    final session = supabase.auth.currentSession;
-    final user = session?.user;
-    final email = user?.email;
+    final User? user = FirebaseAuth.instance.currentUser;
+    final String? email = user?.email;
 
     if (email == null) {
       setState(() {
@@ -121,7 +123,7 @@ class _ImagePreviewScreenState extends State<ImagePreviewScreen> {
         shadowColor: Color.fromARGB(255, 54, 43, 75),
         title: Text(
           "Add new Post",
-          style: TextStyle(fontSize: 27, fontWeight: FontWeight.bold),
+          style: Theme.of(context).textTheme.titleSmall,
         ),
         leading: IconButton(
           onPressed: () {
@@ -129,21 +131,8 @@ class _ImagePreviewScreenState extends State<ImagePreviewScreen> {
           },
           icon: Icon(
             Icons.arrow_back_ios,
-            size: 20,
-            color:
-                Theme.of(context).brightness == Brightness.dark
-                    ? const Color.fromARGB(
-                      255,
-                      135,
-                      128,
-                      139,
-                    ) // Dark mode color
-                    : const Color.fromARGB(
-                      255,
-                      203,
-                      194,
-                      205,
-                    ), // Light mode color
+            size: 30,
+            color: Theme.of(context).iconTheme.color,
           ),
         ),
       ),
@@ -164,19 +153,15 @@ class _ImagePreviewScreenState extends State<ImagePreviewScreen> {
           Column(
             mainAxisAlignment: MainAxisAlignment.start,
             children: <Widget>[
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  ElevatedButton(
-                    onPressed: () {
-                      Navigator.pop(context);
-                    },
-                    child: Text(
-                      'Retake',
-                      style: TextStyle(color: Color.fromARGB(255, 54, 43, 75)),
-                    ),
-                  ),
-                ],
+              Padding(
+                padding: const EdgeInsets.fromLTRB(60, 8, 60, 8),
+                child: ElevatedButton(
+                  onPressed: () {
+                    Navigator.pop(context);
+                  },
+                  style: CustomElevatedButtonTheme(context),
+                  child: Text('Retake', style: TextStyle(fontSize: 18)),
+                ),
               ),
               const SizedBox(height: 10),
               Form(
@@ -212,12 +197,22 @@ class _ImagePreviewScreenState extends State<ImagePreviewScreen> {
                         child: DropdownButtonHideUnderline(
                           child: DropdownButton<String>(
                             value: categorySelctor,
-                            hint: Text('Select a category'),
+
+                            hint: Text(
+                              'Select a category',
+                              style: Theme.of(context).textTheme.labelSmall,
+                            ),
                             items:
                                 categories.map((String item) {
                                   return DropdownMenuItem<String>(
                                     value: item,
-                                    child: Text(item),
+                                    child: Text(
+                                      item,
+                                      style:
+                                          Theme.of(
+                                            context,
+                                          ).textTheme.labelSmall,
+                                    ),
                                   );
                                 }).toList(),
                             onChanged: (String? newValue) {
@@ -246,33 +241,26 @@ class _ImagePreviewScreenState extends State<ImagePreviewScreen> {
                     SizedBox(height: 15),
                     Padding(
                       padding: EdgeInsets.symmetric(horizontal: 40),
-                      child: Container(
-                        decoration: customContainerDecoration(context),
-                        child: ElevatedButton(
-                          onPressed: () async {
-                            // sign in button
-                            if (_formfield.currentState!.validate()) {
-                              uploadImage();
-                              insertData();
-                              Navigator.popAndPushNamed(context, '/Home');
-                            }
-                          },
-                          style: ElevatedButton.styleFrom(
-                            foregroundColor: Colors.white,
-                            backgroundColor: Color.fromARGB(255, 54, 43, 75),
-                            minimumSize: Size(double.infinity, 50),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(50),
-                            ), // Text color
-                          ),
-                          child: Text(
-                            "Add Post",
-                            style: TextStyle(
-                              fontWeight: FontWeight.w600,
-                              fontSize: 18,
-                            ),
-                          ),
-                        ),
+                      child: ElevatedButton(
+                        onPressed: () async {
+                          // sign in button
+                          if (_formfield.currentState!.validate()) {
+                            uploadImage();
+                            insertData();
+                            Navigator.pop(context);
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder:
+                                    (context) => Post_DetailPage(
+                                      postName: Post_name.text,
+                                    ),
+                              ),
+                            );
+                          }
+                        },
+                        style: CustomElevatedButtonTheme(context),
+                        child: Text("Add Post", style: TextStyle(fontSize: 18)),
                       ),
                     ),
                   ],

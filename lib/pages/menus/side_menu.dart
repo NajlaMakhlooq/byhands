@@ -1,9 +1,9 @@
-import 'package:byhands/services/auth/auth_service.dart';
 import 'package:byhands/pages/profile_pages/savedposts.dart';
+import 'package:byhands/services/auth/auth_service.dart';
 import 'package:byhands/pages/setting_pages/s_and_p.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:supabase_flutter/supabase_flutter.dart' as prefix;
 
 class CommonDrawer extends StatefulWidget {
   const CommonDrawer({super.key});
@@ -13,7 +13,8 @@ class CommonDrawer extends StatefulWidget {
 }
 
 class _CommonDrawerState extends State<CommonDrawer> {
-  final SupabaseClient supabase = Supabase.instance.client; // open the database
+  final prefix.SupabaseClient supabase =
+      prefix.Supabase.instance.client; // open the database
   final authService = AuthService();
 
   ThemeMode _themeMode = ThemeMode.light;
@@ -48,9 +49,8 @@ class _CommonDrawerState extends State<CommonDrawer> {
   }
 
   Future<void> fetchUsername() async {
-    final session = supabase.auth.currentSession;
-    final user = session?.user;
-    final email = user?.email;
+    final User? user = FirebaseAuth.instance.currentUser;
+    final String? email = user?.email;
 
     if (email == null) {
       setState(() {
@@ -108,6 +108,8 @@ class _CommonDrawerState extends State<CommonDrawer> {
             TextButton(
               onPressed: () async {
                 await FirebaseAuth.instance.signOut();
+                AuthService authService = AuthService();
+                await authService.signOut();
                 Navigator.pushNamedAndRemoveUntil(
                   context,
                   '/Start',
@@ -167,7 +169,7 @@ class _CommonDrawerState extends State<CommonDrawer> {
             ),
           ],
         ),
-        const SizedBox(height: 10),
+        const SizedBox(height: 20),
       ],
     ),
   );
@@ -179,32 +181,32 @@ class _CommonDrawerState extends State<CommonDrawer> {
       children: [
         ListTile(
           leading: const Icon(Icons.person_rounded),
-          title: Text('Profile', style: Theme.of(context).textTheme.bodyMedium),
+          title: Text('Profile', style: Theme.of(context).textTheme.labelSmall),
           onTap: () {
             Navigator.popAndPushNamed(context, '/profile');
           },
         ),
         ListTile(
-          leading: const Icon(Icons.favorite_rounded),
+          leading: const Icon(Icons.bookmark),
           title: Text(
-            'Liked courses',
-            style: Theme.of(context).textTheme.bodyMedium,
+            'Saved courses',
+            style: Theme.of(context).textTheme.labelSmall,
           ),
           onTap: () {
-            Navigator.popAndPushNamed(context, '/likedcourses');
+            Navigator.popAndPushNamed(context, '/Savedcourses');
           },
         ),
         ListTile(
-          leading: const Icon(Icons.bookmark),
+          leading: const Icon(Icons.favorite_rounded),
           title: Text(
-            'Saved Posts',
-            style: Theme.of(context).textTheme.bodyMedium,
+            'Liked Posts',
+            style: Theme.of(context).textTheme.labelSmall,
           ),
           onTap: () {
             Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (context) => Saved_posts(username: username),
+                builder: (context) => Liked_posts(username: username),
               ),
             );
           },
@@ -213,7 +215,7 @@ class _CommonDrawerState extends State<CommonDrawer> {
           leading: const Icon(Icons.notifications),
           title: Text(
             "Notifications",
-            style: Theme.of(context).textTheme.bodyMedium,
+            style: Theme.of(context).textTheme.labelSmall,
           ),
           onTap: () {
             Navigator.pushNamed(context, '/Notification');
@@ -224,7 +226,7 @@ class _CommonDrawerState extends State<CommonDrawer> {
           leading: const Icon(Icons.settings),
           title: Text(
             'Setting & policy',
-            style: Theme.of(context).textTheme.bodyMedium,
+            style: Theme.of(context).textTheme.labelSmall,
           ),
           onTap: () {
             Navigator.push(
@@ -232,7 +234,8 @@ class _CommonDrawerState extends State<CommonDrawer> {
               MaterialPageRoute(
                 builder:
                     (context) => SettingsPage(
-                      toggleThemeMode: toggleThemeModeSwitch,
+                      toggleThemeMode:
+                          toggleThemeModeSwitch, // ✅ Pass the callback
                       username: username,
                     ),
               ),
@@ -241,7 +244,7 @@ class _CommonDrawerState extends State<CommonDrawer> {
         ),
         ListTile(
           leading: const Icon(Icons.help),
-          title: Text('Help', style: Theme.of(context).textTheme.bodyMedium),
+          title: Text('Help', style: Theme.of(context).textTheme.labelSmall),
           onTap: () {
             Navigator.popAndPushNamed(context, '/Help');
           },

@@ -1,9 +1,12 @@
-import 'package:byhands/theme.dart';
+import 'package:byhands/theme/ThemeCubit.dart';
+import 'package:byhands/theme/theme.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:byhands/pages/menus/side_menu.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:supabase_flutter/supabase_flutter.dart' as prefix;
+import 'package:byhands/theme/globals.dart';
 
 class SettingsPage extends StatefulWidget {
   final VoidCallback toggleThemeMode;
@@ -57,14 +60,14 @@ class _SettingsPageState extends State<SettingsPage> {
     },
   ];
   final supabase = prefix.Supabase.instance.client;
-  bool isDarkMode = false;
   bool lang = false;
   String userPass = "";
+  final User? user = FirebaseAuth.instance.currentUser;
 
   Future<void> deleteSupabaseUserData() async {
-    final userEmail = supabase.auth.currentUser?.email;
-    if (userEmail != null) {
-      await supabase.from('User').delete().eq('Email', userEmail);
+    final String? email = user?.email;
+    if (email != null) {
+      await supabase.from('User').delete().eq('Email', email);
       final storage = supabase.storage.from('images');
 
       // Try downloading the file to check if it exists
@@ -79,27 +82,27 @@ class _SettingsPageState extends State<SettingsPage> {
         // Image does not exist
         print('📛 Image does not exist: $response');
       }
-      await prefix.Supabase.instance.client.from('Deleted_users').insert({
-        'Email': userEmail,
-      });
-      await prefix.Supabase.instance.client.auth.signOut();
+      await supabase.auth.signOut();
       print('✅🗑️ User data deleted from Supabase');
     }
   }
 
-  Future<void> deleteFirebaseUser(String email, String password) async {
+  Future<void> deleteFirebaseUser(String email) async {
     try {
       User? user = FirebaseAuth.instance.currentUser;
-
       if (user != null) {
+        print("🔄🔐 Reauthenticating with: $email / $userPass");
         // Step 1: Re-authenticate
-        AuthCredential credential = EmailAuthProvider.credential(
-          email: email,
-          password: password,
-        );
 
-        await user.reauthenticateWithCredential(credential);
-
+        try {
+          final signInUser = await FirebaseAuth.instance
+              .signInWithEmailAndPassword(email: email, password: userPass);
+          print(
+            "🔄🔐✅ Reauthentication successful with ${signInUser.user!.email}",
+          );
+        } on FirebaseAuthException catch (e) {
+          print("🔄🔐❌ Reauthentication failed: ${e.code} - ${e.message}");
+        }
         // Step 2: Delete Firestore data
         // Get documents where the email field matches the provided email
         QuerySnapshot snapshot =
@@ -107,7 +110,6 @@ class _SettingsPageState extends State<SettingsPage> {
                 .collection('Users')
                 .where('username', isEqualTo: widget.username)
                 .get();
-
         // If there are any documents matching the query, delete them
         if (snapshot.docs.isNotEmpty) {
           for (var doc in snapshot.docs) {
@@ -117,47 +119,30 @@ class _SettingsPageState extends State<SettingsPage> {
         } else {
           print("❌ No document found");
         }
-
         // Step 3: Delete user from Firebase Auth
         await user.delete();
         await FirebaseAuth.instance.signOut();
         print('✅🗑️ Firebase user deleted successfully');
       }
+    } on FirebaseAuthException catch (e) {
+      print('❌ FirebaseAuthException: ${e.code} - ${e.message}');
     } catch (e) {
-      print('❌ Error deleting Firebase user: $e');
+      print('❌ General error deleting user: $e');
     }
   }
 
   Future<void> deleteUserAccount() async {
-    final userEmail = supabase.auth.currentUser?.email;
-    if (userEmail == null || userPass.isEmpty) return;
-
-    final response =
-        await supabase
-            .from('User')
-            .select('Password')
-            .eq('Email', userEmail)
-            .maybeSingle();
-
-    if (response?['Password'] == userPass) {
-      print("✅🔐 Passwords match. Proceeding with deletion...");
-      await deleteSupabaseUserData();
-      print("🔄🔐 Reauthenticating with: $userEmail / $userPass");
-      await deleteFirebaseUser(userEmail, userPass);
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            "✅🗑️🎉 Account deleted successfully.🎉🗑️✅",
-            style: Theme.of(context).textTheme.bodyMedium,
-          ),
+    final String? email = user?.email;
+    await deleteSupabaseUserData();
+    await deleteFirebaseUser(email!);
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          "✅🗑️🎉 Account deleted successfully.🎉🗑️✅",
+          style: Theme.of(context).textTheme.bodyMedium,
         ),
-      );
-    } else {
-      print("❌🔐 Password mismatch. Account deletion aborted.");
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text("Incorrect password.")));
-    }
+      ),
+    );
   }
 
   Future<void> _showPasswordDialogAndDeleteAccount(BuildContext context) async {
@@ -222,22 +207,20 @@ class _SettingsPageState extends State<SettingsPage> {
         backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
         title: Text(
           "Setting and privacy",
-          style: Theme.of(context).textTheme.titleLarge,
+          style: Theme.of(context).textTheme.titleSmall,
         ),
         actions: [
           IconButton(
             icon: const Icon(Icons.home),
+            color: Theme.of(context).iconTheme.color,
+            iconSize: 30,
             onPressed: () => Navigator.popAndPushNamed(context, '/Home'),
           ),
         ],
         leading: IconButton(
-          icon: Icon(
-            Icons.arrow_back,
-            color:
-                Theme.of(context).brightness == Brightness.dark
-                    ? const Color.fromARGB(255, 135, 128, 139)
-                    : const Color.fromARGB(255, 203, 194, 205),
-          ),
+          icon: Icon(Icons.arrow_back),
+          color: Theme.of(context).iconTheme.color,
+          iconSize: 30,
           onPressed: () => Navigator.pop(context),
         ),
       ),
@@ -246,20 +229,19 @@ class _SettingsPageState extends State<SettingsPage> {
         padding: const EdgeInsets.all(8.0),
         child: Column(
           children: [
-            Text("Settings", style: Theme.of(context).textTheme.titleLarge),
+            Text("Settings", style: Theme.of(context).textTheme.labelLarge),
             const Divider(),
             Row(
               children: [
                 Text(
                   'Dark Mode',
-                  style: Theme.of(context).textTheme.titleMedium,
+                  style: Theme.of(context).textTheme.labelMedium,
                 ),
                 const SizedBox(width: 10),
                 Switch(
-                  value: isDarkMode,
-                  onChanged: (value) {
-                    setState(() => isDarkMode = value);
-                    widget.toggleThemeMode();
+                  value: Theme.of(context).brightness == Brightness.dark,
+                  onChanged: (_) {
+                    context.read<ThemeCubit>().toggleTheme();
                   },
                 ),
               ],
@@ -269,7 +251,7 @@ class _SettingsPageState extends State<SettingsPage> {
               children: [
                 Text(
                   'Language',
-                  style: Theme.of(context).textTheme.titleMedium,
+                  style: Theme.of(context).textTheme.labelMedium,
                 ),
                 const SizedBox(width: 10),
                 Switch(
@@ -283,7 +265,28 @@ class _SettingsPageState extends State<SettingsPage> {
               children: [
                 Text(
                   'Text Size',
-                  style: Theme.of(context).textTheme.titleMedium,
+                  style: Theme.of(context).textTheme.labelMedium,
+                ),
+                ValueListenableBuilder<double>(
+                  valueListenable: textScaleNotifier,
+                  builder: (context, scale, _) {
+                    return Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('Text Size: ${(scale * 100).toInt()}%'),
+                        Slider(
+                          value: scale,
+                          min: 0.8,
+                          max: 1.2,
+                          divisions: 4,
+                          label: '${(scale * 100).toInt()}%',
+                          onChanged: (newScale) {
+                            textScaleNotifier.value = newScale;
+                          },
+                        ),
+                      ],
+                    );
+                  },
                 ),
               ],
             ),
@@ -292,24 +295,14 @@ class _SettingsPageState extends State<SettingsPage> {
               padding: const EdgeInsets.symmetric(horizontal: 40),
               child: ElevatedButton(
                 onPressed: () => _showPasswordDialogAndDeleteAccount(context),
-                style: ElevatedButton.styleFrom(
-                  foregroundColor: Colors.white,
-                  backgroundColor: const Color.fromARGB(255, 54, 43, 75),
-                  minimumSize: const Size(double.infinity, 50),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(50),
-                  ),
-                ),
-                child: const Text(
-                  "Delete account",
-                  style: TextStyle(fontWeight: FontWeight.w600, fontSize: 18),
-                ),
+                style: CustomElevatedButtonTheme(context),
+                child: const Text("Delete account"),
               ),
             ),
             const SizedBox(height: 30),
             Text(
               "Privacy Policy",
-              style: Theme.of(context).textTheme.titleLarge,
+              style: Theme.of(context).textTheme.labelLarge,
             ),
             const Divider(),
             Expanded(
@@ -324,14 +317,14 @@ class _SettingsPageState extends State<SettingsPage> {
                     return ExpansionTile(
                       title: Text(
                         item['name'] ?? '',
-                        style: Theme.of(context).textTheme.bodyLarge,
+                        style: Theme.of(context).textTheme.labelMedium,
                       ),
                       children: [
                         Padding(
                           padding: const EdgeInsets.all(16.0),
                           child: Text(
                             item['desc'] ?? '',
-                            style: Theme.of(context).textTheme.bodyMedium,
+                            style: Theme.of(context).textTheme.bodyLarge,
                           ),
                         ),
                       ],

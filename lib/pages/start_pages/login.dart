@@ -1,6 +1,5 @@
 import 'package:byhands/services/auth/auth_service.dart';
-import 'package:byhands/services/forgetpassword.dart';
-import 'package:byhands/theme.dart';
+import 'package:byhands/theme/theme.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:byhands/pages/start_pages/signup.dart';
@@ -14,7 +13,6 @@ class Login extends StatefulWidget {
 
 class _LoginState extends State<Login> {
   final authService = AuthService();
-  // text controller
   final _formfield = GlobalKey<FormState>();
   late final emailController = TextEditingController();
   final passController = TextEditingController();
@@ -26,7 +24,10 @@ class _LoginState extends State<Login> {
     final pw = passController.text.trim();
     //attempt login
     try {
-      await authService.signInWithEmailAndPassword(email, pw);
+      await authService.signInWithEmailAndPassword(
+        "byhandsapplication@gmail.com",
+        "ByhandsapplicationDatabase_2025",
+      );
       UserCredential userCredential = await FirebaseAuth.instance
           .signInWithEmailAndPassword(email: email, password: pw);
       print("✅🔐 Logged in as ${userCredential.user?.email}");
@@ -39,7 +40,7 @@ class _LoginState extends State<Login> {
           SnackBar(
             content: Text(
               "❌ Error: $e",
-              style: Theme.of(context).textTheme.bodyMedium,
+              style: Theme.of(context).textTheme.labelSmall,
             ),
             backgroundColor: Theme.of(context).scaffoldBackgroundColor,
           ),
@@ -48,7 +49,7 @@ class _LoginState extends State<Login> {
           SnackBar(
             content: Text(
               "🔄 check your email and password again",
-              style: Theme.of(context).textTheme.bodyMedium,
+              style: Theme.of(context).textTheme.labelSmall,
             ),
             backgroundColor: Theme.of(context).scaffoldBackgroundColor,
           ),
@@ -68,7 +69,7 @@ class _LoginState extends State<Login> {
   Widget build(BuildContext context) {
     return Scaffold(
       resizeToAvoidBottomInset: true,
-      backgroundColor: Color.fromARGB(255, 247, 246, 251),
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: SafeArea(
         child: Center(
           child: Container(
@@ -83,14 +84,12 @@ class _LoginState extends State<Login> {
                     children: <Widget>[
                       Text(
                         "Login",
-                        style: Theme.of(
-                          context,
-                        ).textTheme.titleLarge!.copyWith(fontSize: 35),
+                        style: Theme.of(context).textTheme.titleMedium,
                       ),
                       SizedBox(height: 20),
                       Text(
                         "Login to your account",
-                        style: Theme.of(context).textTheme.bodyLarge,
+                        style: Theme.of(context).textTheme.labelSmall,
                       ),
                     ],
                   ),
@@ -103,6 +102,7 @@ class _LoginState extends State<Login> {
                           width: MediaQuery.of(context).size.width * 0.8,
                           child: TextFormField(
                             keyboardType: TextInputType.emailAddress,
+                            style: Theme.of(context).textTheme.labelMedium,
                             controller: emailController,
                             decoration: textInputdecoration(
                               context,
@@ -124,13 +124,13 @@ class _LoginState extends State<Login> {
                         SizedBox(
                           width: MediaQuery.of(context).size.width * 0.8,
                           child: TextFormField(
+                            style: Theme.of(context).textTheme.labelMedium,
                             controller: passController,
                             obscureText: passToggle,
-                            decoration: InputDecoration(
-                              labelText: "Password",
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(15),
-                              ),
+                            decoration: textInputdecoration(
+                              context,
+                              "Password",
+                            ).copyWith(
                               prefixIcon: Icon(Icons.lock_outline_rounded),
                               suffixIcon: IconButton(
                                 icon: Icon(
@@ -143,13 +143,6 @@ class _LoginState extends State<Login> {
                                     passToggle = !passToggle;
                                   });
                                 },
-                              ),
-                              filled: true,
-                              focusedBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(15),
-                              ),
-                              enabledBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(15),
                               ),
                             ),
                             validator: (value) {
@@ -172,14 +165,7 @@ class _LoginState extends State<Login> {
                           login();
                         }
                       },
-                      style: ElevatedButton.styleFrom(
-                        foregroundColor: Colors.white,
-                        backgroundColor: Color.fromARGB(255, 54, 43, 75),
-                        minimumSize: Size(double.infinity, 50),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(50),
-                        ), // Text color
-                      ),
+                      style: CustomElevatedButtonTheme(context),
                       child: Text(
                         "Login",
                         style: TextStyle(
@@ -192,16 +178,11 @@ class _LoginState extends State<Login> {
                   SizedBox(height: 60),
                   TextButton(
                     onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => EmailVerificationPage(),
-                        ),
-                      );
+                      Navigator.pushNamed(context, '/forgot_password');
                     },
                     child: Text(
                       "Forgot Password?",
-                      style: Theme.of(context).textTheme.bodyMedium!.copyWith(
+                      style: Theme.of(context).textTheme.labelSmall!.copyWith(
                         decoration: TextDecoration.underline,
                       ),
                     ),
@@ -211,7 +192,7 @@ class _LoginState extends State<Login> {
                     children: <Widget>[
                       Text(
                         "Don't have an account?",
-                        style: Theme.of(context).textTheme.bodyMedium,
+                        style: Theme.of(context).textTheme.labelSmall,
                       ),
                       TextButton(
                         onPressed: () {
@@ -222,7 +203,7 @@ class _LoginState extends State<Login> {
                         },
                         child: Text(
                           " Sign up",
-                          style: Theme.of(context).textTheme.bodyLarge,
+                          style: Theme.of(context).textTheme.labelSmall,
                         ),
                       ),
                     ],

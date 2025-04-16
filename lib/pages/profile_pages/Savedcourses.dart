@@ -1,21 +1,22 @@
 import 'package:byhands/pages/courses/Course_details.dart';
-import 'package:byhands/theme.dart';
+import 'package:byhands/theme/theme.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:byhands/pages/menus/side_menu.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:supabase_flutter/supabase_flutter.dart' as prefix;
 
 // ignore: camel_case_types
-class likedcourses extends StatefulWidget {
-  const likedcourses({super.key});
+class Savedcourses extends StatefulWidget {
+  const Savedcourses({super.key});
 
   @override
-  State<likedcourses> createState() => _likedcourses();
+  State<Savedcourses> createState() => _Savedcourses();
 }
 
-class _likedcourses extends State<likedcourses> {
-  final SupabaseClient supabase = Supabase.instance.client;
+class _Savedcourses extends State<Savedcourses> {
+  final prefix.SupabaseClient supabase = prefix.Supabase.instance.client;
   int userid = 0;
-  List<Map<String, dynamic>> likedCourses = [];
+  List<Map<String, dynamic>> SavedCourses = [];
   bool isLoading = true; // To show a loading indicator
 
   @override
@@ -31,9 +32,8 @@ class _likedcourses extends State<likedcourses> {
       });
 
       // Get the user session and email
-      final session = supabase.auth.currentSession;
-      final user = session?.user;
-      final email = user?.email;
+      final User? user = FirebaseAuth.instance.currentUser;
+      final String? email = user?.email;
 
       if (email == null) {
         setState(() {
@@ -56,7 +56,7 @@ class _likedcourses extends State<likedcourses> {
           userid = response['UserID'];
         });
 
-        // Fetch the liked courses after obtaining UserID
+        // Fetch the Saved courses after obtaining UserID
         await fetchCourses();
       } else {
         setState(() {
@@ -74,21 +74,21 @@ class _likedcourses extends State<likedcourses> {
 
   Future<void> fetchCourses() async {
     try {
-      // Fetch liked course IDs for the user
+      // Fetch Saved course IDs for the user
       final response = await supabase
-          .from('liked_course')
+          .from('Saved_course')
           .select()
           .eq('user_id', userid);
 
-      List<int> likedCoursesId =
+      List<int> SavedCoursesId =
           (response as List<dynamic>?)
               ?.map((e) => e['course_id'] as int)
               .toList() ??
           [];
 
-      // Fetch course details for each liked course ID
+      // Fetch course details for each Saved course ID
       List<Map<String, dynamic>> fetchedCourses = [];
-      for (int courseId in likedCoursesId) {
+      for (int courseId in SavedCoursesId) {
         final courseResponse =
             await supabase.from('Courses').select().eq('id', courseId).single();
 
@@ -96,7 +96,7 @@ class _likedcourses extends State<likedcourses> {
       }
 
       setState(() {
-        likedCourses = fetchedCourses; // Update the likedCourses state
+        SavedCourses = fetchedCourses; // Update the SavedCourses state
       });
     } catch (error) {
       print('❌ Error fetching courses: $error');
@@ -109,7 +109,7 @@ class _likedcourses extends State<likedcourses> {
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
         backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
-        title: const Text("Liked Courses"),
+        title: const Text("Saved Courses"),
         actions: <Widget>[
           IconButton(
             onPressed: () {
@@ -155,12 +155,12 @@ class _likedcourses extends State<likedcourses> {
                 children: [
                   Expanded(
                     child:
-                        likedCourses.isEmpty
+                        SavedCourses.isEmpty
                             ? Center(child: Text('No Courses Saved.'))
                             : ListView.builder(
-                              itemCount: likedCourses.length,
+                              itemCount: SavedCourses.length,
                               itemBuilder: (context, index) {
-                                final course = likedCourses[index];
+                                final course = SavedCourses[index];
                                 return Padding(
                                   padding: const EdgeInsets.symmetric(
                                     horizontal: 10,
@@ -245,7 +245,7 @@ class _likedcourses extends State<likedcourses> {
                                                 key: formfield,
                                                 child: SingleChildScrollView(
                                                   child: Text(
-                                                    "If you press Ok the course will be deleted from liked courses.",
+                                                    "If you press Ok the course will be deleted from Saved courses.",
                                                   ),
                                                 ),
                                               ),
@@ -254,7 +254,7 @@ class _likedcourses extends State<likedcourses> {
                                                   child: Text("Ok"),
                                                   onPressed: () async {
                                                     await supabase
-                                                        .from('liked_course')
+                                                        .from('Saved_course')
                                                         .delete()
                                                         .eq('user_id', userid)
                                                         .eq(
@@ -266,7 +266,7 @@ class _likedcourses extends State<likedcourses> {
                                                     Navigator.of(
                                                       context,
                                                     ).pushNamed(
-                                                      '/likedcourses',
+                                                      '/Savedcourses',
                                                     );
                                                   },
                                                 ),

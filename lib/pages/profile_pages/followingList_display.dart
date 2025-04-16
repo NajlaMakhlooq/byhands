@@ -1,7 +1,7 @@
 import 'package:byhands/pages/profile_pages/UsersProfile.dart';
-import 'package:byhands/theme.dart';
+import 'package:byhands/theme/theme.dart';
 import 'package:flutter/material.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:supabase_flutter/supabase_flutter.dart' as prefix;
 
 class FollowinglistDisplay extends StatefulWidget {
   FollowinglistDisplay({super.key, required this.followingList});
@@ -12,7 +12,7 @@ class FollowinglistDisplay extends StatefulWidget {
 }
 
 class _FollowinglistDisplayState extends State<FollowinglistDisplay> {
-  final SupabaseClient supabase = Supabase.instance.client;
+  final prefix.SupabaseClient supabase = prefix.Supabase.instance.client;
   List<dynamic> displayedFollowing = [];
   String searchQuery = '';
 
@@ -151,7 +151,7 @@ class _FollowinglistDisplayState extends State<FollowinglistDisplay> {
 
 Future<bool> checkCategorynameExists(String name) async {
   final response =
-      await Supabase.instance.client
+      await prefix.Supabase.instance.client
           .from('categories')
           .select()
           .eq('Name', name)

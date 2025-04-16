@@ -1,6 +1,7 @@
-import 'package:byhands/theme.dart';
+import 'package:byhands/theme/theme.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:supabase_flutter/supabase_flutter.dart' as prefix;
 
 class CourseDetailPage extends StatefulWidget {
   final String courseName;
@@ -12,7 +13,7 @@ class CourseDetailPage extends StatefulWidget {
 }
 
 class _CourseDetailPageState extends State<CourseDetailPage> {
-  final SupabaseClient supabase = Supabase.instance.client;
+  final prefix.SupabaseClient supabase = prefix.Supabase.instance.client;
   int userid = 0;
   List<Map<String, dynamic>> CourseDetails = [];
   bool isLoading = true; // To show a loading indicator
@@ -30,9 +31,8 @@ class _CourseDetailPageState extends State<CourseDetailPage> {
       });
 
       // Get the user session and email
-      final session = supabase.auth.currentSession;
-      final user = session?.user;
-      final email = user?.email;
+      final User? user = FirebaseAuth.instance.currentUser;
+      final String? email = user?.email;
 
       if (email == null) {
         setState(() {
@@ -54,7 +54,7 @@ class _CourseDetailPageState extends State<CourseDetailPage> {
           userid = response['UserID'];
         });
 
-        // Fetch the liked courses after obtaining UserID
+        // Fetch the Saved courses after obtaining UserID
         await fetchCourses();
       } else {
         setState(() {
@@ -289,7 +289,7 @@ class _CourseDetailPageState extends State<CourseDetailPage> {
                       IconButton(
                         color: Color.fromARGB(255, 54, 43, 75),
                         onPressed: () {
-                          AddToLikedCourses();
+                          AddToSavedCourses();
                         },
                         icon: Icon(Icons.favorite),
                       ),
@@ -300,7 +300,7 @@ class _CourseDetailPageState extends State<CourseDetailPage> {
     );
   }
 
-  Future<void> AddToLikedCourses() async {
+  Future<void> AddToSavedCourses() async {
     try {
       // Fetch course ID based on course name
       final courseResponse =
@@ -317,10 +317,10 @@ class _CourseDetailPageState extends State<CourseDetailPage> {
 
       int C_id = courseResponse['id'];
 
-      // Check if the same data already exists in 'liked_course'
+      // Check if the same data already exists in 'Saved_course'
       final existingEntry =
           await supabase
-              .from('liked_course')
+              .from('Saved_course')
               .select('*')
               .eq('user_id', userid)
               .eq('course_id', C_id)
@@ -332,11 +332,11 @@ class _CourseDetailPageState extends State<CourseDetailPage> {
           context: context,
           builder: (BuildContext context) {
             return AlertDialog(
-              title: Text("Already Liked"),
+              title: Text("Already Saved"),
               content: Form(
                 key: formfield,
                 child: SingleChildScrollView(
-                  child: Text("This course is already in the liked courses."),
+                  child: Text("This course is already in the Saved courses."),
                 ),
               ),
               actions: [
@@ -353,8 +353,8 @@ class _CourseDetailPageState extends State<CourseDetailPage> {
         return; // Exit if the data is already present
       }
 
-      // Insert data into 'liked_course' table
-      await Supabase.instance.client.from('liked_course').insert({
+      // Insert data into 'Saved_course' table
+      await supabase.from('Saved_course').insert({
         'user_id': userid,
         'course_id': C_id,
       });

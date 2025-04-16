@@ -47,17 +47,17 @@ class _StartState extends State<Start> {
               duration: const Duration(seconds: 2),
               child: Image.asset(
                 'assets/logo.png',
-                width: 200, // Adjust width
-                height: 200,
+                width: 220, // Adjust width
+                height: 220,
               ),
             ),
             const SizedBox(height: 10),
             AnimatedOpacity(
               opacity: _opacity,
               duration: const Duration(seconds: 2),
-              child: const Text(
+              child: Text(
                 'BY Hands App',
-                style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                style: Theme.of(context).textTheme.titleLarge,
               ),
             ),
           ],

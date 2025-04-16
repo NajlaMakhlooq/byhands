@@ -1,6 +1,7 @@
-import 'package:byhands/theme.dart';
+import 'package:byhands/theme/theme.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:supabase_flutter/supabase_flutter.dart' as prefix;
 
 class Post_DetailPage extends StatefulWidget {
   @override
@@ -11,12 +12,12 @@ class Post_DetailPage extends StatefulWidget {
 }
 
 class _Post_DetailPageState extends State<Post_DetailPage> {
-  final SupabaseClient supabase = Supabase.instance.client;
+  final prefix.SupabaseClient supabase = prefix.Supabase.instance.client;
   int postID = 0;
   String? imageUrl;
   String? description;
   String username = "";
-  bool? liked;
+  bool? Liked;
 
   List<Map<String, dynamic>> details = [
     {"no data": "no data"},
@@ -30,9 +31,8 @@ class _Post_DetailPageState extends State<Post_DetailPage> {
   }
 
   Future<void> fetchusername() async {
-    final session = supabase.auth.currentSession;
-    final user = session?.user;
-    final email = user?.email;
+    final User? user = FirebaseAuth.instance.currentUser;
+    final String? email = user?.email;
     if (email != null) {
       final response =
           await supabase.from('User').select().eq('Email', email).maybeSingle();
@@ -88,24 +88,24 @@ class _Post_DetailPageState extends State<Post_DetailPage> {
       } catch (error) {
         print('❌ Error fetching Comments: $error');
       }
-      Future<void> checkLiked() async {
-        final checkLiked =
+      Future<void> checkSaved() async {
+        final checkSaved =
             await supabase
-                .from('Saved_posts')
+                .from('Liked_posts')
                 .select()
                 .eq('username', username)
                 .eq('post_id', postID)
                 .maybeSingle();
 
-        if (checkLiked != null) {
+        if (checkSaved != null) {
           setState(() {
-            liked = true;
+            Liked = true;
           });
-          print("⏳ liked? $liked");
+          print("⏳ Saved? $Liked");
         }
       }
 
-      checkLiked();
+      checkSaved();
     }
 
     fetchPost();
@@ -153,6 +153,32 @@ class _Post_DetailPageState extends State<Post_DetailPage> {
         title: Text(
           widget.postName,
           style: Theme.of(context).textTheme.titleLarge,
+        ),
+        leading: Builder(
+          builder: (BuildContext context) {
+            return IconButton(
+              icon: Icon(
+                Icons.arrow_back,
+                color:
+                    Theme.of(context).brightness == Brightness.dark
+                        ? const Color.fromARGB(
+                          255,
+                          135,
+                          128,
+                          139,
+                        ) // Dark mode color
+                        : const Color.fromARGB(
+                          255,
+                          203,
+                          194,
+                          205,
+                        ), // Light mode color
+              ),
+              onPressed: () {
+                Navigator.pop(context);
+              },
+            );
+          },
         ),
       ),
       body:
@@ -227,7 +253,7 @@ class _Post_DetailPageState extends State<Post_DetailPage> {
                             ),
                             IconButton(
                               color:
-                                  liked != true
+                                  Liked != true
                                       ? Color.fromARGB(255, 54, 43, 75)
                                       : Color.fromARGB(255, 213, 16, 16),
                               onPressed: () {
@@ -433,26 +459,26 @@ class _Post_DetailPageState extends State<Post_DetailPage> {
 
   Future<void> AddToSavedPosts() async {
     try {
-      if (liked = true) {
+      if (Liked = true) {
         await supabase
-            .from('Saved_posts')
+            .from('Liked_posts')
             .delete()
             .eq('username', username)
             .eq('post_id', postID);
 
         setState(() {
-          liked = false;
+          Liked = false;
         });
 
         return; // Exit if the data is deleted
       } else {
-        // Insert data into 'liked_course' table
-        await Supabase.instance.client.from('Saved_posts').insert({
+        // Insert data into 'Liked_posts' table
+        await supabase.from('Liked_posts').insert({
           'post_id': postID,
           'username': username,
         });
         setState(() {
-          liked = true;
+          Liked = true;
         });
         final formfield = GlobalKey<FormState>();
         showDialog(

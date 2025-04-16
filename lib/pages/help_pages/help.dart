@@ -1,7 +1,8 @@
 import 'package:byhands/pages/menus/side_menu.dart';
-import 'package:byhands/theme.dart';
+import 'package:byhands/theme/theme.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:supabase_flutter/supabase_flutter.dart' as prefix;
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 
 class Help extends StatefulWidget {
@@ -13,8 +14,8 @@ class Help extends StatefulWidget {
 
 class _HelpState extends State<Help> {
   List<Map<String, dynamic>> FAQsList = [];
-  final SupabaseClient supabase = Supabase.instance.client;
-  int userID = 0;
+  final prefix.SupabaseClient supabase = prefix.Supabase.instance.client;
+  String username = "";
 
   @override
   void initState() {
@@ -25,12 +26,11 @@ class _HelpState extends State<Help> {
 
   Future<void> fetchInformation() async {
     // get the user email
-    final session = supabase.auth.currentSession;
-    final user = session?.user;
-    final email = user?.email;
+    final User? user = FirebaseAuth.instance.currentUser;
+    final String? email = user?.email;
     if (email == null) {
       setState(() {
-        userID = 0;
+        username = "";
       });
       return;
     }
@@ -39,7 +39,7 @@ class _HelpState extends State<Help> {
     final response =
         await supabase.from('User').select().eq('Email', email).maybeSingle();
     setState(() {
-      userID = response?['UserID'] ?? 0;
+      username = response?['username'] ?? "";
     });
   }
 
@@ -210,7 +210,7 @@ class _HelpState extends State<Help> {
 
     Future<void> insertFAQ() async {
       try {
-        await Supabase.instance.client.from('FAQs_Req').insert({
+        await supabase.from('FAQs_Req').insert({
           'Question': QuestionController.text,
         });
       } catch (e) {
@@ -311,8 +311,8 @@ class _HelpState extends State<Help> {
 
     Future<void> insertFeedback() async {
       try {
-        await Supabase.instance.client.from('Feedback').insert({
-          'user_id': userID,
+        await supabase.from('Feedback').insert({
+          'username': username,
           'feedback_content': FeedbackController.text,
           'rate': Rating,
         });

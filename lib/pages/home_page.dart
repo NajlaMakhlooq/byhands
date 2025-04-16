@@ -3,9 +3,10 @@ import 'package:byhands/pages/menus/side_menu.dart';
 import 'package:byhands/pages/courses/Course_details.dart';
 import 'package:byhands/pages/categories/category_details.dart';
 import 'package:byhands/pages/profile_pages/UsersProfile.dart';
-import 'package:byhands/theme.dart';
+import 'package:byhands/theme/theme.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:supabase_flutter/supabase_flutter.dart' as prefix;
 import 'package:scroll_snap_list/scroll_snap_list.dart';
 
 class DashboardPage extends StatefulWidget {
@@ -16,7 +17,7 @@ class DashboardPage extends StatefulWidget {
 }
 
 class _DashboardPage extends State<DashboardPage> {
-  final SupabaseClient supabase = Supabase.instance.client;
+  final prefix.SupabaseClient supabase = prefix.Supabase.instance.client;
   final TextEditingController _searchController = TextEditingController();
   List<Map<String, dynamic>> _searchResults = [];
   bool _showDropdown = false;
@@ -57,9 +58,8 @@ class _DashboardPage extends State<DashboardPage> {
 
   Future<void> fetchUsers() async {
     try {
-      final session = supabase.auth.currentSession;
-      final user = session?.user;
-      final email = user?.email;
+      final User? user = FirebaseAuth.instance.currentUser;
+      final String? email = user?.email;
       if (email == null) {
         setState(() {
           username = "No user logged in";
@@ -121,7 +121,7 @@ class _DashboardPage extends State<DashboardPage> {
   }
 
   Future<void> _performSearch(String query) async {
-    final SupabaseClient supabase = Supabase.instance.client;
+    final prefix.SupabaseClient supabase = prefix.Supabase.instance.client;
 
     final response = await supabase
         .from('User')
@@ -152,15 +152,15 @@ class _DashboardPage extends State<DashboardPage> {
                     Theme.of(context).brightness == Brightness.dark
                         ? const Color.fromARGB(
                           255,
-                          135,
-                          128,
-                          139,
+                          177,
+                          167,
+                          183,
                         ) // Dark mode color
                         : const Color.fromARGB(
                           255,
-                          203,
-                          194,
-                          205,
+                          72,
+                          59,
+                          75,
                         ), // Light mode color
               ),
               onPressed: () {
@@ -173,8 +173,11 @@ class _DashboardPage extends State<DashboardPage> {
           // Search Bar
           height: 40,
           child: TextField(
+            style: Theme.of(context).textTheme.labelMedium,
             controller: _searchController,
-            decoration: const InputDecoration(
+            decoration: InputDecoration(
+              hintStyle: Theme.of(context).textTheme.labelMedium,
+              contentPadding: EdgeInsets.all(3),
               hintText: 'Search for users...',
               prefixIcon: Icon(Icons.search),
               border: OutlineInputBorder(),
@@ -200,26 +203,74 @@ class _DashboardPage extends State<DashboardPage> {
                   itemCount: _searchResults.length,
                   itemBuilder: (context, index) {
                     final user = _searchResults[index];
-                    return ListTile(
-                      title: Text(
-                        user['Username'],
-                        style: Theme.of(context).textTheme.bodyMedium,
-                      ),
-                      onTap: () {
-                        // Navigate to the selected user's profile
-                        _searchController.text = '';
-                        setState(() {
-                          _showDropdown = false;
-                        });
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder:
-                                (context) =>
-                                    UsersProfile(username: user['Username']),
-                          ),
+                    final response = supabase.storage
+                        .from('images')
+                        .getPublicUrl(
+                          'images/profiles/${user['Username']}/${user['Username']}profile',
                         );
-                      },
+
+                    return Column(
+                      children: [
+                        ListTile(
+                          title: Row(
+                            children: [
+                              Container(
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  border: Border.all(
+                                    color: Color.fromARGB(
+                                      255,
+                                      216,
+                                      222,
+                                      236,
+                                    ), // border color
+                                    width: 2, // Set the width of the border
+                                  ),
+                                ),
+                                child: CircleAvatar(
+                                  radius: 20,
+                                  backgroundColor: const Color.fromARGB(
+                                    255,
+                                    216,
+                                    222,
+                                    236,
+                                  ),
+                                  backgroundImage: NetworkImage(
+                                    '$response?t=${DateTime.now().millisecondsSinceEpoch}',
+                                  ),
+                                  onBackgroundImageError: (error, stackTrace) {
+                                    print('📛 Error loading image: $error');
+                                  },
+                                ),
+                              ),
+                              SizedBox(width: 20),
+                              Text(
+                                user['Username'],
+                                style: Theme.of(context).textTheme.labelMedium,
+                              ),
+                            ],
+                          ),
+
+                          onTap: () {
+                            // Navigate to the selected user's profile
+                            _searchController.text = '';
+                            setState(() {
+                              _showDropdown = false;
+                            });
+                            Navigator.pop(context);
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder:
+                                    (context) => UsersProfile(
+                                      username: user['Username'],
+                                    ),
+                              ),
+                            );
+                          },
+                        ),
+                        Divider(),
+                      ],
                     );
                   },
                 ),
@@ -235,11 +286,11 @@ class _DashboardPage extends State<DashboardPage> {
                         padding: const EdgeInsets.fromLTRB(20, 0, 0, 0),
                         child: Text(
                           'Users followed',
-                          style: Theme.of(context).textTheme.titleLarge,
+                          style: Theme.of(context).textTheme.titleSmall,
                         ),
                       ),
                     ),
-                    SizedBox(height: 10),
+                    SizedBox(height: 5),
                     SizedBox(
                       height: 130,
                       child:
@@ -247,7 +298,8 @@ class _DashboardPage extends State<DashboardPage> {
                               ? Center(
                                 child: Text(
                                   'No Users found.',
-                                  style: Theme.of(context).textTheme.bodySmall,
+                                  style:
+                                      Theme.of(context).textTheme.labelMedium,
                                 ),
                               )
                               : Padding(
@@ -297,6 +349,7 @@ class _DashboardPage extends State<DashboardPage> {
                                 ),
                               ),
                     ),
+                    SizedBox(height: 20),
                     Row(
                       children: [
                         Align(
@@ -307,7 +360,7 @@ class _DashboardPage extends State<DashboardPage> {
                             padding: const EdgeInsets.fromLTRB(20, 0, 0, 0),
                             child: Text(
                               'Categories',
-                              style: Theme.of(context).textTheme.titleLarge,
+                              style: Theme.of(context).textTheme.titleSmall,
                             ),
                           ),
                         ),
@@ -319,26 +372,30 @@ class _DashboardPage extends State<DashboardPage> {
                             padding: const EdgeInsets.fromLTRB(20, 0, 0, 0),
                             child: TextButton(
                               onPressed: () {
-                                Navigator.pushNamed(context, '/Categories');
+                                Navigator.popAndPushNamed(
+                                  context,
+                                  '/Categories',
+                                );
                               },
                               child: Text(
                                 'see all',
-                                style: Theme.of(context).textTheme.bodyMedium,
+                                style: Theme.of(context).textTheme.labelMedium,
                               ),
                             ),
                           ),
                         ),
                       ],
                     ),
-                    SizedBox(height: 10),
+                    SizedBox(height: 5),
                     SizedBox(
-                      height: 140,
+                      height: 160,
                       child:
                           allCategories.isEmpty
                               ? Center(
                                 child: Text(
                                   'No categories found.',
-                                  style: Theme.of(context).textTheme.bodySmall,
+                                  style:
+                                      Theme.of(context).textTheme.labelMedium,
                                 ),
                               )
                               : Padding(
@@ -399,13 +456,13 @@ class _DashboardPage extends State<DashboardPage> {
                         padding: const EdgeInsets.fromLTRB(20, 0, 0, 0),
                         child: Text(
                           'Popular Courses',
-                          style: Theme.of(context).textTheme.titleLarge,
+                          style: Theme.of(context).textTheme.titleSmall,
                         ),
                       ),
                     ),
                     SizedBox(height: 10),
                     SizedBox(
-                      height: 250,
+                      height: 270,
                       child: ScrollSnapList(
                         itemBuilder: _buildItemList,
                         itemSize: 200,
@@ -440,14 +497,14 @@ class _DashboardPage extends State<DashboardPage> {
         Container(
           decoration: customContainerDecoration(context),
           width: 200,
-          height: 240,
+          height: 260,
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Image.network(
                 courseImageURL,
                 width: 120, // Increased size for visibility
-                height: 130,
+                height: 120,
                 loadingBuilder: (context, child, loadingProgress) {
                   if (loadingProgress == null) return child;
                   return CircularProgressIndicator(); // Loading spinner
@@ -463,26 +520,26 @@ class _DashboardPage extends State<DashboardPage> {
               Text(
                 course['Name'],
                 textAlign: TextAlign.center,
-                style: Theme.of(context).textTheme.bodyMedium,
+                style: Theme.of(context).textTheme.labelMedium,
               ),
               SizedBox(height: 8),
-              TextButton(
-                onPressed: () {
-                  final course = Courses[index];
-                  String courseName = course['Name'];
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder:
-                          (context) => CourseDetailPage(courseName: courseName),
-                    ),
-                  );
-                },
-                child: Text(
-                  "view course",
-                  style: Theme.of(context).textTheme.bodyMedium!.copyWith(
-                    decoration: TextDecoration.underline,
-                  ),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: TextButton(
+                  onPressed: () {
+                    final course = Courses[index];
+                    String courseName = course['Name'];
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder:
+                            (context) =>
+                                CourseDetailPage(courseName: courseName),
+                      ),
+                    );
+                  },
+                  style: CustomElevatedButtonTheme(context),
+                  child: Text("view course", style: TextStyle(fontSize: 16)),
                 ),
               ),
             ],
@@ -511,16 +568,14 @@ class CategoryCard extends StatelessWidget {
       onTap: onTap,
       child: Container(
         width: 90,
-        height: 120,
+        height: 140,
         decoration: customContainerDecoration(context),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Image.network(
               imageUrl,
-              width:
-                  MediaQuery.sizeOf(context).width *
-                  0.10, // Increased size for visibility
+              width: 70, // Increased size for visibility
               loadingBuilder: (context, child, loadingProgress) {
                 if (loadingProgress == null) return child;
                 return CircularProgressIndicator(); // Loading spinner
@@ -536,7 +591,7 @@ class CategoryCard extends StatelessWidget {
             Text(
               label,
               textAlign: TextAlign.center,
-              style: Theme.of(context).textTheme.bodySmall,
+              style: Theme.of(context).textTheme.bodyLarge,
             ),
           ],
         ),
@@ -582,7 +637,7 @@ class UserCard extends StatelessWidget {
                 ),
               ),
               child: CircleAvatar(
-                radius: 35,
+                radius: 30,
                 backgroundColor: const Color.fromARGB(255, 216, 222, 236),
                 backgroundImage: NetworkImage(imageUrl),
                 onBackgroundImageError: (error, stackTrace) {
@@ -590,11 +645,11 @@ class UserCard extends StatelessWidget {
                 },
               ),
             ),
-            SizedBox(height: 10),
+            SizedBox(height: 6),
             Text(
               label,
               textAlign: TextAlign.center,
-              style: Theme.of(context).textTheme.bodySmall,
+              style: Theme.of(context).textTheme.bodyLarge,
             ),
           ],
         ),

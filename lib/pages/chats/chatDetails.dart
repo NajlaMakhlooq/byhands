@@ -4,7 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:supabase_flutter/supabase_flutter.dart' as prefix;
 
 class ChatDetailScreen extends StatefulWidget {
   final String username;
@@ -19,7 +19,7 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
   List<Map<String, dynamic>> messages = [];
   final _formKey = GlobalKey<FormState>();
   final _messageController = TextEditingController();
-  final SupabaseClient supabase = Supabase.instance.client;
+  final prefix.SupabaseClient supabase = prefix.Supabase.instance.client;
   final ChatService _chatService = ChatService();
   final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
   String Username = "";
@@ -31,9 +31,8 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
   }
 
   Future<void> fetchUsername() async {
-    final session = supabase.auth.currentSession;
-    final user = session?.user;
-    final email = user?.email;
+    final User? user = FirebaseAuth.instance.currentUser;
+    final String? email = user?.email;
 
     if (email == null) {
       setState(() {

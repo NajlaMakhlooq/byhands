@@ -1,7 +1,7 @@
-import 'package:byhands/theme.dart';
+import 'package:byhands/theme/theme.dart';
 import 'package:flutter/material.dart';
 import 'package:byhands/pages/courses/Course_details.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:supabase_flutter/supabase_flutter.dart' as prefix;
 
 class Courses extends StatefulWidget {
   final String userName;
@@ -12,7 +12,8 @@ class Courses extends StatefulWidget {
 }
 
 class _CoursesState extends State<Courses> {
-  final SupabaseClient supabase = Supabase.instance.client; // open the database
+  final prefix.SupabaseClient supabase =
+      prefix.Supabase.instance.client; // open the database
   List<Map<String, dynamic>> courses = [];
   bool isLoading = true;
   int userId = 0;
@@ -81,7 +82,8 @@ class CourseCard extends StatefulWidget {
 }
 
 class _CourseCardState extends State<CourseCard> {
-  final SupabaseClient supabase = Supabase.instance.client; // open the database
+  final prefix.SupabaseClient supabase =
+      prefix.Supabase.instance.client; // open the database
   @override
   Widget build(BuildContext context) {
     return Padding(
