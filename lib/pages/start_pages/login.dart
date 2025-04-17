@@ -18,6 +18,39 @@ class _LoginState extends State<Login> {
   final passController = TextEditingController();
   bool passToggle = true;
 
+  Future<bool> isEmailVerified() async {
+    User? user = FirebaseAuth.instance.currentUser;
+
+    // Check if the email is verified
+    if (user != null && user.emailVerified) {
+      print("✅ Email is verified");
+      return true;
+    } else {
+      print("❌ Email not verified");
+      return false;
+    }
+  }
+
+  void checkUserVerification(BuildContext context) async {
+    bool isVerified = await isEmailVerified();
+
+    if (!isVerified) {
+      // Show alert or disable access to the app
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Please verify your email before proceeding.')),
+      );
+
+      // Sign out the user until they verify their email
+      FirebaseAuth.instance.signOut();
+      Navigator.popAndPushNamed(context, '/login');
+    } else {
+      // Allow user to proceed in the app
+      User? userCredential = FirebaseAuth.instance.currentUser;
+      print("✅🔐 Logged in as ${userCredential!.email}");
+      Navigator.popAndPushNamed(context, '/Home');
+    }
+  }
+
   void login() async {
     //prepare the data
     final email = emailController.text.trim();
@@ -28,10 +61,11 @@ class _LoginState extends State<Login> {
         "byhandsapplication@gmail.com",
         "ByhandsapplicationDatabase_2025",
       );
-      UserCredential userCredential = await FirebaseAuth.instance
-          .signInWithEmailAndPassword(email: email, password: pw);
-      print("✅🔐 Logged in as ${userCredential.user?.email}");
-      Navigator.pushNamed(context, '/Home');
+      await FirebaseAuth.instance.signInWithEmailAndPassword(
+        email: email,
+        password: pw,
+      );
+      checkUserVerification(context);
     }
     // catch any error
     catch (e) {

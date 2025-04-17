@@ -78,6 +78,7 @@ class _SettingsPageState extends State<SettingsPage> {
       if (response.isNotEmpty) {
         // Image exists, proceed to delete it
         await storage.remove(['images/profiles/${widget.username}']);
+        print('✅🗑️ Image profile deleted');
       } else {
         // Image does not exist
         print('📛 Image does not exist: $response');
@@ -137,6 +138,7 @@ class _SettingsPageState extends State<SettingsPage> {
     await deleteFirebaseUser(email!);
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         content: Text(
           "✅🗑️🎉 Account deleted successfully.🎉🗑️✅",
           style: Theme.of(context).textTheme.bodyMedium,

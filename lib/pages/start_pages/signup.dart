@@ -97,14 +97,65 @@ class _SignupState extends State<Signup> {
       } catch (e) {
         print("❌🗂️ Error inserting data: $e");
       }
-
+      User? user = userCredential.user;
+      await sendEmailVerification(user!);
       // Navigate to home page after successful sign-up
-      Navigator.popAndPushNamed(context, '/Home');
       print("✅🎉 Account created successfully 🎉✅");
+      checkUserVerification(context);
     } catch (e) {
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(SnackBar(content: Text("❌ Error: $e")));
+    }
+  }
+
+  void checkUserVerification(BuildContext context) async {
+    bool isVerified = await isEmailVerified();
+
+    if (!isVerified) {
+      // Show alert or disable access to the app
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Please verify your email before proceeding.')),
+      );
+
+      // Sign out the user until they verify their email
+      FirebaseAuth.instance.signOut();
+      Navigator.popAndPushNamed(context, '/login');
+    } else {
+      // Allow user to proceed in the app
+      Navigator.popAndPushNamed(context, '/Home');
+    }
+  }
+
+  Future<bool> isEmailVerified() async {
+    User? user = FirebaseAuth.instance.currentUser;
+
+    // Check if the email is verified
+    if (user != null && user.emailVerified) {
+      print("✅ Email is verified");
+      return true;
+    } else {
+      print("❌ Email not verified");
+      return false;
+    }
+  }
+
+  Future<void> resendVerificationEmail(User user) async {
+    try {
+      await user.sendEmailVerification();
+      print("✅ Verification email resent.");
+    } on FirebaseAuthException catch (e) {
+      print("❌ Error resending email: ${e.message}");
+    }
+  }
+
+  Future<void> sendEmailVerification(User user) async {
+    try {
+      // Send email verification
+      await user.sendEmailVerification();
+      print("✅ Email verification sent to ${user.email}");
+    } on FirebaseAuthException catch (e) {
+      print("❌ Error sending verification email: ${e.message}");
     }
   }
 

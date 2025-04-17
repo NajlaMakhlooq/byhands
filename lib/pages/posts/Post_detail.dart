@@ -50,7 +50,7 @@ class _Post_DetailPageState extends State<Post_DetailPage> {
               .eq('Name', widget.postName)
               .maybeSingle();
 
-      fetchPostDetails();
+      await fetchPostDetails();
 
       if (response != null) {
         // Fetch the public URL for the image
@@ -184,8 +184,7 @@ class _Post_DetailPageState extends State<Post_DetailPage> {
       body:
           imageUrl == null
               ? Center(child: CircularProgressIndicator())
-              : Padding(
-                padding: const EdgeInsets.all(8.0),
+              : SingleChildScrollView(
                 child: Column(
                   children: <Widget>[
                     Column(
@@ -215,7 +214,7 @@ class _Post_DetailPageState extends State<Post_DetailPage> {
                                   236,
                                 ),
                                 backgroundImage: NetworkImage(
-                                  username != ""
+                                  response != ""
                                       ? '$response?t=${DateTime.now().millisecondsSinceEpoch}'
                                       : "",
                                 ),
@@ -345,7 +344,9 @@ class _Post_DetailPageState extends State<Post_DetailPage> {
                           ),
                           Spacer(),
                           TextButton(
-                            onPressed: () {},
+                            onPressed: () {
+                              _NewComment(context);
+                            },
                             child: Text(
                               "add comment",
                               style: Theme.of(context).textTheme.bodyMedium,
@@ -354,106 +355,190 @@ class _Post_DetailPageState extends State<Post_DetailPage> {
                         ],
                       ),
                     ),
-                    Expanded(
-                      child:
-                          comments.isEmpty
-                              ? Center(child: Text("No comments"))
-                              : ListView.builder(
-                                itemCount: comments.length,
-                                itemBuilder: (context, index) {
-                                  final commentdetails = comments[index];
-                                  String responseComment = supabase.storage
-                                      .from('images')
-                                      .getPublicUrl(
-                                        'images/profiles/${commentdetails['username']}/${commentdetails['username']}profile',
-                                      );
-                                  return Padding(
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 10,
-                                      vertical: 5,
-                                    ),
-                                    child: Container(
-                                      decoration: UsersListContainerDecoration(
-                                        context,
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(20, 0, 20, 10),
+                      child: SizedBox(
+                        child:
+                            comments.isEmpty
+                                ? Center(child: Text("No comments"))
+                                : ListView.builder(
+                                  shrinkWrap: true, // Important!
+                                  itemCount: comments.length,
+                                  itemBuilder: (context, index) {
+                                    final commentdetails = comments[index];
+                                    String responseComment = supabase.storage
+                                        .from('images')
+                                        .getPublicUrl(
+                                          'images/profiles/${commentdetails['username']}/${commentdetails['username']}profile',
+                                        );
+                                    return Padding(
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 10,
+                                        vertical: 5,
                                       ),
-                                      child: ListTile(
-                                        onTap: () {},
-                                        contentPadding: EdgeInsets.symmetric(
-                                          horizontal: 20,
-                                          vertical: 10,
-                                        ),
-                                        title: Row(
-                                          children: [
-                                            Container(
-                                              decoration: BoxDecoration(
-                                                shape: BoxShape.circle,
-                                                border: Border.all(
-                                                  color: Color.fromARGB(
-                                                    255,
-                                                    216,
-                                                    222,
-                                                    236,
-                                                  ), // desired border color
-                                                  width:
-                                                      2, // Set the width of the border
-                                                ),
-                                              ),
-                                              child: CircleAvatar(
-                                                radius: 20,
-                                                backgroundColor:
-                                                    const Color.fromARGB(
+                                      child: Container(
+                                        decoration:
+                                            UsersListContainerDecoration(
+                                              context,
+                                            ),
+                                        child: ListTile(
+                                          onTap: () {},
+                                          contentPadding: EdgeInsets.symmetric(
+                                            horizontal: 20,
+                                            vertical: 10,
+                                          ),
+                                          title: Row(
+                                            children: [
+                                              Container(
+                                                decoration: BoxDecoration(
+                                                  shape: BoxShape.circle,
+                                                  border: Border.all(
+                                                    color: Color.fromARGB(
                                                       255,
                                                       216,
                                                       222,
                                                       236,
-                                                    ),
-                                                backgroundImage: NetworkImage(
-                                                  username != ""
-                                                      ? '$responseComment?t=${DateTime.now().millisecondsSinceEpoch}'
-                                                      : "",
+                                                    ), // desired border color
+                                                    width:
+                                                        2, // Set the width of the border
+                                                  ),
                                                 ),
-                                                onBackgroundImageError: (
-                                                  error,
-                                                  stackTrace,
-                                                ) {
-                                                  print(
-                                                    '📛 Error loading image: $error',
-                                                  );
-                                                },
+                                                child: CircleAvatar(
+                                                  radius: 20,
+                                                  backgroundColor:
+                                                      const Color.fromARGB(
+                                                        255,
+                                                        216,
+                                                        222,
+                                                        236,
+                                                      ),
+                                                  backgroundImage: NetworkImage(
+                                                    responseComment != ""
+                                                        ? '$responseComment?t=${DateTime.now().millisecondsSinceEpoch}'
+                                                        : "",
+                                                  ),
+                                                  onBackgroundImageError: (
+                                                    error,
+                                                    stackTrace,
+                                                  ) {
+                                                    print(
+                                                      '📛 Error loading image: $error',
+                                                    );
+                                                  },
+                                                ),
                                               ),
-                                            ),
-                                            SizedBox(width: 10),
-                                            Column(
-                                              children: [
-                                                Text(
-                                                  commentdetails['username']
-                                                      .toString(),
-                                                  style:
-                                                      Theme.of(
-                                                        context,
-                                                      ).textTheme.bodyLarge,
-                                                ),
-                                                Text(
-                                                  commentdetails['Content']
-                                                      .toString(),
-                                                  style:
-                                                      Theme.of(
-                                                        context,
-                                                      ).textTheme.bodyMedium,
-                                                ),
-                                              ],
-                                            ),
-                                          ],
+                                              SizedBox(width: 10),
+                                              Column(
+                                                children: [
+                                                  Text(
+                                                    commentdetails['username']
+                                                        .toString(),
+                                                    style:
+                                                        Theme.of(
+                                                          context,
+                                                        ).textTheme.bodyLarge,
+                                                  ),
+                                                  Text(
+                                                    commentdetails['Content']
+                                                        .toString(),
+                                                    style:
+                                                        Theme.of(
+                                                          context,
+                                                        ).textTheme.bodyMedium,
+                                                  ),
+                                                ],
+                                              ),
+                                            ],
+                                          ),
                                         ),
                                       ),
-                                    ),
-                                  );
-                                },
-                              ),
+                                    );
+                                  },
+                                ),
+                      ),
                     ),
                   ],
                 ),
               ),
+    );
+  }
+
+  void _NewComment(BuildContext context) {
+    final formfield = GlobalKey<FormState>();
+    final CommentController = TextEditingController();
+
+    Future<void> insertComment() async {
+      try {
+        await supabase.from('Comment').insert({
+          'PostID': postID,
+          'Content': CommentController.text,
+          'username': username,
+        });
+      } catch (e) {
+        print("❌🗂️ Error inserting data: $e");
+      }
+    }
+
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text("New Comment"),
+          content: Form(
+            key: formfield,
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  SizedBox(
+                    width: double.infinity,
+                    child: TextFormField(
+                      controller: CommentController,
+                      decoration: textInputdecoration(
+                        context,
+                        "Write Comment here",
+                      ).copyWith(prefixIcon: Icon(Icons.abc)),
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return "Please enter your comment first";
+                        }
+                        return null;
+                      },
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          actions: [
+            TextButton(
+              child: Text("Cancel"),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            TextButton(
+              child: Text("Submit"),
+              onPressed: () async {
+                // Insert Data
+                if (formfield.currentState!.validate()) {
+                  insertComment();
+                  Navigator.pop(context);
+                  Navigator.pop(context);
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder:
+                          (context) =>
+                              Post_DetailPage(postName: widget.postName),
+                    ),
+                  );
+                }
+              },
+            ),
+          ],
+        );
+      },
     );
   }
 

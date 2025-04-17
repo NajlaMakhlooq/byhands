@@ -12,6 +12,7 @@ import 'package:byhands/pages/profile_pages/Savedcourses.dart';
 import 'package:byhands/pages/profile_pages/profile.dart';
 import 'package:byhands/services/forgetpassword.dart';
 import 'package:byhands/theme/ThemeCubit.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:byhands/services/auth/firebase_auth_repo.dart';
@@ -22,11 +23,11 @@ import 'package:byhands/pages/start_pages/start.dart';
 import 'package:byhands/pages/start_pages/signup.dart';
 import 'package:byhands/theme/theme.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:supabase_flutter/supabase_flutter.dart' as prefix;
 import 'package:byhands/theme/globals.dart';
 
 void main() async {
-  await Supabase.initialize(
+  await prefix.Supabase.initialize(
     url: 'https://glkepkzkeymwtlfkoemw.supabase.co',
     anonKey:
         'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imdsa2Vwa3prZXltd3RsZmtvZW13Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDA0NjI5MzgsImV4cCI6MjA1NjAzODkzOH0.AsEOsn2CsONZK4x58hZtXJhJVsSxq5-wLtU_4WdQ3pk',
@@ -62,7 +63,18 @@ class BY_HANDSApp extends StatelessWidget {
                 theme: getScaledTheme(lightTheme, scale),
                 darkTheme: getScaledTheme(darkTheme, scale),
                 themeMode: themeMode, // Bind themeMode to Bloc state
-                home: const Start(),
+                home: StreamBuilder<User?>(
+                  stream: FirebaseAuth.instance.authStateChanges(),
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return Center(child: CircularProgressIndicator());
+                    } else if (snapshot.hasData) {
+                      return DashboardPage();
+                    } else {
+                      return Start();
+                    }
+                  },
+                ),
                 routes: {
                   '/Start': (context) => const Start(),
                   '/Home': (context) => DashboardPage(),
