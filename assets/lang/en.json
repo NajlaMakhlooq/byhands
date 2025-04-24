@@ -1,0 +1,232 @@
+{
+  "home": {
+    "title": "Welcome",
+    "button_ar": "Switch to Arabic"
+  },
+  "menu": {
+    "dashboard": "Dashboard",
+    "category": "Category",
+    "camera": "Camera",
+    "courses": "Courses",
+    "chats": "Chats"
+  },
+  "drawer": {
+  "profile": "Profile",
+  "liked_courses": "Liked Courses",
+  "saved_posts": "Saved Posts",
+  "notifications": "Notifications",
+  "settings_policy": "Settings & Policy",
+  "help": "Help",
+  "change_language": "Change Language"
+  },
+  "app_overview": {
+  "title": "App Overview",
+  "description1": "By Hands is a mobile application designed to bring together talented individuals and hobbyists in Bahrain, providing a dedicated social media platform for networking, collaboration, and sharing creative works.",
+  "description2": "This application serves as a digital hub where users with similar interests can connect, interact, and showcase their skills in various fields such as art, music, photography, writing, and more.",
+  "description3": "Through By Hands, talented individuals in Bahrain can gain visibility, find inspiration, and form valuable connections with like-minded people, ultimately enriching the creative landscape of the country."
+  },
+  "help": {
+    "title": "Help",
+    "helpSupport": "Help & Support",
+    "appOverview": "App Overview",
+    "howToUse": "How to Use",
+    "contactSupport": "Contact Support",
+    "sendFeedback": "Send Feedback",
+    "faqs": "FAQs",
+    "noFAQFound": "No FAQ found.",
+    "addQuestion": "Add new question?",
+    "askQuestion": "Add your question!",
+    "enterQuestion": "Please enter your question",
+    "submit": "Submit",
+    "cancel": "Cancel",
+    "ok": "OK",
+    "phone": "Phone",
+    "email": "Email",
+    "yourFeedback": "Your feedback",
+    "enterFeedback": "Please enter feedback"
+  },
+  "camera": {
+    "cameraTitle": "Camera",
+    "galleryButton": "Pick from Gallery",
+    "captureButton": "Capture",
+    "loading": "Loading camera..."
+  },
+  "categories": {
+    "title": "Categories",
+    "searchLabel": "Search Categories",
+    "requestTitle": "Request New Category",
+    "name": "Category Name",
+    "description": "Category Description",
+    "explanation": "Category Request Explanation",
+    "nameValidation": "Please enter category name",
+    "descriptionValidation": "Please enter category description",
+    "explanationValidation": "Please enter category request explanation",
+    "requestButton": "Request for a new category",
+    "exists": "Category already exists"
+  },
+  "common": {
+    "submit": "Submit",
+    "cancel": "Cancel"
+  },
+  "courses": {
+    "title":"Cources",
+    "ncourse":"+ New Course",
+    "search": "Search Courses"
+  },
+  "dashboard": {
+    "title": "Search for talented people...",
+    "new": "Creative Newcomers",
+    "not": "No Users found.",
+    "categories": "Categories",
+    "see": "See all",
+    "noc": "No categories found.",
+    "courses": "Popular Courses",
+    "view": "view course"
+  },
+  "notifications": {
+    "title": "Notifications",
+    "noNotifications": "No notifications found."
+  }, 
+  "settings": {
+    "title": "Setting and privacy",
+    "Settings": "Settings",
+    "dark": "Dark Mode",
+    "privacyPolicy": "Privacy Policy",
+    "intro": "1. Introduction",
+    "introD": "This is where you explain the purpose of your app and how you handle user data."
+  },
+  "login": {
+    "title": "Login",
+    "logint": "Login to your account",
+    "email": "Email",
+    "emaile": "Enter correct email",
+    "password": "Password",
+    "passworde": "Please enter your password",
+    "loginButton": "Login",
+    "forgotPassword": "Forgot Password?",
+    "noAccount": "Don't have an account?",
+    "signUp": "Sign Up"
+  },
+  "signup": {
+    "male": "Male",
+    "female": "Female",
+    "title": "Sign Up",
+    "signupt": "Create your new account!",
+    "name": "Username",
+    "namee": "Please Enter your name",
+    "email": "Email",
+    "emaile": "Please Enter a Valid Email",
+    "password": "Password",
+    "passworde": "Please enter your password",
+    "confirmPassword": "Confirm Password",
+    "confirmPasswde": "Please confirm your password",
+    "match": "Passwords do not match",
+    "bio": "Bio",
+    "bioe" : "Please enter your bio",
+    "gender": "Gender",
+    "date": "Date of Birth",
+    "nameer": "Username already exists",
+    "signupButton": "Sign Up",
+    "alreadyHaveAccount": "Already have an account?",
+    "login": "Login",
+    "genderselection": "Select a Gender"
+  },
+  "other": {
+    "posts": "Posts",
+    "followers": "Followers",
+    "followings": "Followings"
+  },
+  "edit": {
+    "title": "Edit Profile",
+    "male": "Male",
+    "female": "Female",
+    "update": "Profile updated successfully!",
+    "name": "Username",
+    "bio": "Bio",
+    "email": "Email",
+    "cancel": "CANCEL",
+    "save": "SAVE",
+    "erMessage": "Please enter your ",
+    "gender": "Gender"
+  },
+  "follower": {
+    "title": "Follower List",
+    "search": "Search Categories",
+    "noUsers": "No users found."
+  },
+  "following": {
+    "title": "Following List",
+    "search": "Search Categories",
+    "noUsers": "No users found."
+  },
+  "post": {
+    "noPosts": "No posts found."
+  },
+  "header": {
+    "post": "Posts" ,
+    "followers": "Followers",
+    "following": "Following"
+  },
+  "course": {
+    "noCourse": "No courses provided."
+  },
+  "like": {
+    "title": "Liked Courses",
+    "noCourses": "No Courses Saved.",
+    "unlike": "Unlike course ?",
+    "warnning": "If you press Ok the course will be deleted from your list.",
+    "ok": "OK",
+    "cancel": "Cancel"
+  },
+  "save": {
+    "title": "Saved posts",
+    "noPost": "No Posts Saved."
+  },
+  "cd": {
+    "noPost": "No Posts provided."
+  },
+  "ccd": {
+    "description": "Description",
+    "category": "Category :",
+    "provider": "Provider :",
+    "price": "Price :",
+    "location": "Location :",
+    "contact": "Contact provider",
+    "AlreadyLiked": "Already Liked",
+    "AlreadyLikedMessage": "You have already liked this course.",
+    "ok": "OK"
+  },
+  "ips": {
+    "title": "Add new Post",
+    "retake": "Retake",
+    "name": "Post Name",
+    "name_error": "Please enter post name",
+    "category": "Category",
+    "categoryd": "Select a category",
+    "content": "Content",
+    "add": "Add Post"
+  },
+  "postd": {
+    "name": "Name : ",
+    "category": "Category :",
+    "content": "Content : ",
+    "provider":"Provider : ",
+    "noPost": "No Post found.",
+    "contact": "Contact provider",
+    "comments": "Comments",
+    "nocomments": "No comments"
+  },
+  "addc": {
+    "title": "Add new course",
+    "descriptionMessage": "Please enter course description",
+    "priceMessage": "Please enter course price",
+    "category": "Category",
+    "categoryMessage": "Select a category",
+    "date": "Date", 
+    "location": "Location",
+    "locationMessage": "Please enter course location",
+    "namee": "Course name already exists",
+    "add": "Add course"
+  }
+
+}
